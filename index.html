@@ -17,27 +17,111 @@
             --danger: #dc3545;
             --white: #ffffff;
             --border: #ddd;
+            --cheque-bg: #fceea7; /* أصفر الشيك البريدي */
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Cairo', sans-serif; transition: all 0.3s ease; }
         body { background-color: var(--bg); color: var(--text); overflow-x: hidden; }
 
-        /* الهيدر */
-        header { background: var(--white); padding: 15px 5%; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
-        .logo img { height: 60px; object-fit: contain; }
-        .lang-switch { cursor: pointer; background: var(--primary); color: var(--white); padding: 8px 15px; border-radius: 20px; font-weight: bold; border: none; }
+        /* الهيدر واللوجو */
+        header { 
+            padding: 15px 5%; 
+            display: flex; 
+            justify-content: flex-end; /* ليبقى الزر في الطرف فقط */
+        }
+        .lang-switch { 
+            cursor: pointer; background: var(--primary); color: var(--white); 
+            padding: 8px 20px; border-radius: 20px; font-weight: bold; border: none; font-size: 1rem;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        
+        .logo-container {
+            text-align: center;
+            margin-top: -10px;
+            margin-bottom: 30px;
+        }
+        .logo-container img { 
+            height: 120px; /* اللوجو أكبر */
+            object-fit: contain; 
+        }
 
         /* الحاويات */
-        .container { max-width: 1000px; margin: 30px auto; padding: 0 20px; }
+        .container { max-width: 1000px; margin: 0 auto 30px; padding: 0 20px; }
         .view { display: none; animation: fadeIn 0.5s; }
         .view.active { display: block; }
 
-        /* تصميم الشيك */
-        .cheque-box { background: linear-gradient(135deg, #fdfbfb 0%, #ebedee 100%); border: 2px dashed var(--primary); padding: 30px; border-radius: 15px; position: relative; box-shadow: 0 10px 20px rgba(0,0,0,0.05); margin-bottom: 30px; overflow: hidden; }
-        .cheque-box::before { content: ''; position: absolute; top: 0; left: 0; width: 10px; height: 100%; background: var(--primary); }
-        .cheque-box h3 { color: var(--primary); margin-bottom: 20px; border-bottom: 1px solid var(--border); padding-bottom: 10px; }
-        .cheque-info { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; font-size: 1.1rem; }
-        .cheque-info span { font-weight: bold; color: var(--primary); }
+        /* تصميم الشيك البريدي الجزائري */
+        .cheque-box { 
+            background-color: var(--cheque-bg);
+            border: 1px solid #d4c466; 
+            padding: 25px; 
+            border-radius: 5px; 
+            position: relative; 
+            box-shadow: inset 0 0 20px rgba(0,0,0,0.03), 0 5px 15px rgba(0,0,0,0.08); 
+            margin-bottom: 35px; 
+            overflow: hidden;
+            background-image: 
+                linear-gradient(rgba(255, 255, 255, 0.5) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255, 255, 255, 0.5) 1px, transparent 1px);
+            background-size: 20px 20px;
+            color: #222;
+        }
+        .cheque-header {
+            display: flex;
+            justify-content: space-between;
+            border-bottom: 2px solid #d32f2f;
+            padding-bottom: 10px;
+            margin-bottom: 25px;
+        }
+        .cheque-header span {
+            color: #d32f2f;
+            font-weight: 900;
+            font-size: 1.1rem;
+            letter-spacing: 1px;
+        }
+        .cheque-row {
+            display: flex;
+            align-items: flex-end;
+            margin-bottom: 20px;
+            font-size: 1.1rem;
+            font-weight: 600;
+        }
+        .cheque-row span:first-child {
+            white-space: nowrap;
+            margin-right: 10px;
+            margin-left: 10px;
+        }
+        .handwritten {
+            flex-grow: 1;
+            border-bottom: 2px dotted #555;
+            padding: 0 10px 5px;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 1.3rem;
+            font-weight: bold;
+            color: #000;
+            text-align: center;
+        }
+        .cheque-footer {
+            display: flex;
+            justify-content: center;
+            margin-top: 30px;
+        }
+        .rip-box {
+            border: 2px solid #222;
+            padding: 10px 20px;
+            background: #fff;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        .rip-box .machine-code {
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 1.4rem;
+            font-weight: bold;
+            letter-spacing: 2px;
+            color: #000;
+        }
 
         /* النماذج */
         .form-card { background: var(--white); padding: 30px; border-radius: 15px; box-shadow: 0 5px 15px rgba(0,0,0,0.05); margin-bottom: 20px; }
@@ -48,8 +132,9 @@
 
         /* الأزرار والأنيميشن */
         .btn { background: var(--primary); color: var(--white); border: none; padding: 15px 30px; border-radius: 8px; font-size: 1.1rem; cursor: pointer; width: 100%; font-weight: bold; position: relative; overflow: hidden; }
-        .btn:hover { background: #0d47a1; }
+        .btn:hover { background: #0d47a1; transform: translateY(-2px); box-shadow: 0 5px 15px rgba(21,101,192,0.3);}
         .btn-report { background: var(--secondary); color: var(--text); margin-top: 10px; }
+        .btn-report:hover { background: #f9a825; box-shadow: 0 5px 15px rgba(251,192,45,0.3); }
         
         .note { text-align: center; color: var(--danger); font-weight: bold; margin-top: 15px; font-size: 0.95rem; }
 
@@ -61,7 +146,7 @@
         [dir="ltr"] .close-modal { right: auto; left: 15px; }
 
         /* إشعارات النجاح */
-        .success-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,255,255,0.9); z-index: 9999; align-items: center; justify-content: center; flex-direction: column; }
+        .success-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,255,255,0.95); z-index: 9999; align-items: center; justify-content: center; flex-direction: column; }
         .success-overlay.active { display: flex; animation: fadeIn 0.3s; }
         .checkmark { width: 80px; height: 80px; border-radius: 50%; display: block; stroke-width: 2; stroke: var(--success); stroke-miterlimit: 10; margin: 10% auto; box-shadow: inset 0px 0px 0px var(--success); animation: fill .4s ease-in-out .4s forwards, scale .3s ease-in-out .9s both; }
         .checkmark__circle { stroke-dasharray: 166; stroke-dashoffset: 166; stroke-width: 2; stroke-miterlimit: 10; stroke: var(--success); fill: none; animation: stroke 0.6s cubic-bezier(0.65, 0, 0.45, 1) forwards; }
@@ -85,15 +170,20 @@
         .admin-table th, .admin-table td { padding: 12px 15px; border: 1px solid var(--border); text-align: center; }
         .admin-table th { background: var(--primary); color: #fff; }
         
-        .time-badge { padding: 3px 8px; border-radius: 12px; font-size: 0.8rem; font-weight: bold; color: #fff; }
+        .time-badge { padding: 4px 10px; border-radius: 12px; font-size: 0.85rem; font-weight: bold; color: #fff; }
         .time-green { background: var(--success); }
         .time-orange { background: var(--warning); color: #000; }
         .time-red { background: var(--danger); }
         
-        .status-select { padding: 5px; border-radius: 5px; }
+        .status-select { padding: 5px; border-radius: 5px; cursor: pointer; font-weight:bold;}
 
         .settings-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
-        @media(max-width: 768px) { .settings-grid { grid-template-columns: 1fr; } }
+        @media(max-width: 768px) { 
+            .settings-grid { grid-template-columns: 1fr; } 
+            .cheque-row { flex-direction: column; align-items: flex-start; }
+            .handwritten { width: 100%; text-align: right; }
+            [dir="ltr"] .handwritten { text-align: left; }
+        }
 
         @keyframes slideDown { from { transform: translateY(-50px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
@@ -104,12 +194,14 @@
 </head>
 <body>
 
+    <!-- الهيدر واللوجو -->
     <header>
-        <div class="logo">
-            <img src="https://play-lh.googleusercontent.com/4yxUE_wg_ljg1BRyO7BQ8l3siAyQZSeGx17OKyo0Y2Htt9A5oJEC7-zW0p4opjIbWQ=w600-h300-pc0xffffff-pd" alt="Algérie Poste">
-        </div>
         <button class="lang-switch" onclick="toggleLang()" id="langBtn">FR</button>
     </header>
+    
+    <div class="logo-container">
+        <img src="https://play-lh.googleusercontent.com/4yxUE_wg_ljg1BRyO7BQ8l3siAyQZSeGx17OKyo0Y2Htt9A5oJEC7-zW0p4opjIbWQ=w600-h300-pc0xffffff-pd" alt="Algérie Poste">
+    </div>
 
     <!-- شاشة نجاح العملية -->
     <div class="success-overlay" id="successOverlay">
@@ -122,15 +214,30 @@
 
     <!-- واجهة المستخدم (العميل) -->
     <div class="container view active" id="clientView">
-        <h2 style="text-align: center; margin-bottom: 20px;" id="titlePayment">تأكيد الدفع</h2>
+        <h2 style="text-align: center; margin-bottom: 25px; color: var(--primary);" id="titlePayment">تأكيد الدفع</h2>
         
-        <!-- إطار الشيك -->
+        <!-- إطار الشيك البريدي -->
         <div class="cheque-box">
-            <h3 id="chequeTitle">معلومات الدفع الخاصة بنا</h3>
-            <div class="cheque-info">
-                <div><span id="chqNameLbl">الاسم الكامل:</span> <span id="valName" style="color:#333; font-weight:normal;">---</span></div>
-                <div><span id="chqRipLbl">رقم الحساب (RIP):</span> <span id="valRip" style="color:#333; font-weight:normal;">---</span></div>
-                <div><span id="chqAddrLbl">العنوان:</span> <span id="valAddr" style="color:#333; font-weight:normal;">---</span></div>
+            <div class="cheque-header">
+                <span>CHÈQUE POSTAL</span>
+                <span>شيك بريدي</span>
+            </div>
+            
+            <div class="cheque-row">
+                <span id="chqNameLbl">لأمر (الاسم الكامل):</span>
+                <span id="valName" class="handwritten">---</span>
+            </div>
+            
+            <div class="cheque-row">
+                <span id="chqAddrLbl">العنوان:</span>
+                <span id="valAddr" class="handwritten">---</span>
+            </div>
+            
+            <div class="cheque-footer">
+                <div class="rip-box">
+                    <span id="chqRipLbl">رقم الحساب (RIP):</span>
+                    <span id="valRip" class="machine-code">---</span>
+                </div>
             </div>
         </div>
 
@@ -276,18 +383,18 @@
 
     <!-- بداية برمجة الجافاسكريبت -->
     <script>
-        // التشفير الوهمي لكلمة المرور (للحماية السطحية المطلوبة)
+        // التشفير الوهمي لكلمة المرور (للحماية المطلوبة)
         const ADMIN_HASH = "I2Fib2JvYjIwMjYj"; // base64 for #abobob2026#
         
         // نظام الترجمة
         let lang = 'ar';
         const dict = {
             ar: {
-                titlePayment: "تأكيد الدفع", chequeTitle: "معلومات الدفع الخاصة بنا", chqNameLbl: "الاسم الكامل:", chqRipLbl: "رقم الحساب (RIP):", chqAddrLbl: "العنوان:",
+                titlePayment: "تأكيد الدفع", chqNameLbl: "لأمر (الاسم الكامل):", chqRipLbl: "رقم الحساب (RIP):", chqAddrLbl: "العنوان:",
                 lblFullName: "الاسم الكامل", lblCourse: "اسم الدورة", lblPhone: "رقم الهاتف", lblWilaya: "الولاية", lblRip: "رقم الحساب البريدي (الخاص بك)", lblFile: "رفع إثبات الدفع (Reçu)", btnSubmitPay: "تأكيد الدفع", noteText: "سيتم التأكد من طلبكم في ظرف 24 سا إلى 48 سا، سنتصل بكم فور التأكد من أن دفعكم صحيح.", btnOpenReport: "الإبلاغ عن مشكل", reportTitle: "الإبلاغ عن مشكل", rLblName: "الاسم", rLblEmail: "الإيميل", rLblPhone: "رقم الهاتف", rLblDesc: "الوصف", btnSubmitReport: "إرسال الإبلاغ", successPay: "تم إرسال إثبات الدفع بنجاح", successRep: "تم إرسال الإبلاغ بنجاح"
             },
             fr: {
-                titlePayment: "Confirmation de paiement", chequeTitle: "Nos informations de paiement", chqNameLbl: "Nom complet :", chqRipLbl: "Numéro de compte (RIP) :", chqAddrLbl: "Adresse :",
+                titlePayment: "Confirmation de paiement", chqNameLbl: "À l'ordre de :", chqRipLbl: "Numéro de compte (RIP) :", chqAddrLbl: "Adresse :",
                 lblFullName: "Nom complet", lblCourse: "Nom de la formation", lblPhone: "Numéro de téléphone", lblWilaya: "Wilaya", lblRip: "Numéro de compte postal (Le vôtre)", lblFile: "Télécharger la preuve (Reçu)", btnSubmitPay: "Confirmer le paiement", noteText: "Votre demande sera vérifiée sous 24h à 48h, nous vous contacterons dès confirmation de votre paiement.", btnOpenReport: "Signaler un problème", reportTitle: "Signaler un problème", rLblName: "Nom", rLblEmail: "Email", rLblPhone: "Téléphone", rLblDesc: "Description", btnSubmitReport: "Envoyer le signalement", successPay: "Preuve de paiement envoyée avec succès", successRep: "Signalement envoyé avec succès"
             }
         };
@@ -310,7 +417,7 @@
         // --- قاعدة البيانات المحلية (LocalStorage) ---
         let db = {
             settings: JSON.parse(localStorage.getItem('cc_settings')) || { nameAr: "بريد الجزائر", nameFr: "Algérie Poste", rip: "007999990000000000", addrAr: "الجزائر العاصمة", addrFr: "Alger" },
-            payments: JSON.parse(localStorage.getItem('cc_payments')) || [],
+            payments: JSON.parse(localStorage.getItem('cc_payments')) ||[],
             reports: JSON.parse(localStorage.getItem('cc_reports')) ||[]
         };
         const saveData = () => {
@@ -457,6 +564,7 @@
             };
             saveData();
             alert('تم حفظ الإعدادات بنجاح');
+            loadClientSettings();
         }
 
         function updateTimeLogic() {
