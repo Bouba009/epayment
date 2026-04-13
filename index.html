@@ -3,360 +3,392 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>تأكيد الدفع | Confirmation de Paiement</title>
+    <title>تأكيد الدفع | Payment Confirmation</title>
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&family=Poppins:wght@400;600&display=swap" rel="stylesheet">
     <style>
         :root {
             --primary: #004d99;
             --secondary: #ffcc00;
-            --bg: #f8f9fa;
+            --bg: #f0f2f5;
             --white: #ffffff;
             --text: #333;
-            --danger: #dc3545;
-            --success: #28a745;
-            --warning: #ffc107;
+            --danger: #e74c3c;
+            --success: #2ecc71;
+            --warning: #f1c40f;
+            --info: #3498db;
         }
 
-        * { box-sizing: border-box; transition: all 0.3s ease; }
-        body { 
-            margin: 0; padding: 0; 
-            background-color: var(--bg); 
-            color: var(--text); 
-            font-family: 'Cairo', 'Poppins', sans-serif; 
-        }
+        * { box-sizing: border-box; transition: all 0.2s ease; }
+        body { margin: 0; padding: 0; background-color: var(--bg); color: var(--text); font-family: 'Cairo', 'Poppins', sans-serif; }
 
-        /* Language Switcher */
-        .lang-switch {
-            position: fixed; top: 20px; left: 20px; z-index: 1000;
-        }
-        [dir="ltr"] .lang-switch { left: auto; right: 20px; }
+        .container { max-width: 1000px; margin: 20px auto; padding: 20px; }
         
-        .btn-lang {
-            background: var(--primary); color: white; border: 2px solid var(--secondary);
-            padding: 8px 15px; border-radius: 20px; cursor: pointer; font-weight: bold;
-        }
+        /* Language & Admin Toggle */
+        .top-nav { position: fixed; top: 15px; left: 15px; display: flex; gap: 10px; z-index: 1000; }
+        [dir="ltr"] .top-nav { left: auto; right: 15px; flex-direction: row-reverse; }
+        .btn-ui { background: var(--white); border: 1px solid var(--primary); padding: 8px 15px; border-radius: 25px; cursor: pointer; font-weight: bold; color: var(--primary); box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        .btn-ui:hover { background: var(--primary); color: white; }
 
-        .container { max-width: 900px; margin: 20px auto; padding: 20px; }
-        
-        /* Header & Logo */
-        .header { text-align: center; margin-bottom: 30px; }
-        .logo-img { width: 120px; height: 120px; border-radius: 50%; object-fit: cover; border: 3px solid var(--secondary); margin-bottom: 10px; }
-        
-        /* Check Style Card */
+        /* Header */
+        .header { text-align: center; margin-bottom: 40px; }
+        .logo-img { width: 110px; height: 110px; border-radius: 50%; border: 4px solid var(--secondary); box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+
+        /* Check Card */
         .check-card {
-            background: var(--white); border: 2px solid var(--primary); border-radius: 15px;
-            padding: 25px; position: relative; overflow: hidden;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.1); margin-bottom: 30px;
-            background-image: radial-gradient(var(--primary) 0.5px, transparent 0.5px);
-            background-size: 15px 15px; background-color: #fffdf5;
+            background: #fffdf5; border: 2px dashed var(--primary); border-radius: 15px;
+            padding: 25px; margin-bottom: 30px; position: relative;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
         }
-        .check-card::before {
-            content: "OFFICIAL"; position: absolute; top: 20px; right: -30px;
-            background: rgba(0,77,153,0.05); transform: rotate(45deg);
-            padding: 5px 40px; font-size: 12px; font-weight: bold;
-        }
+        .check-card h3 { margin-top: 0; color: var(--primary); border-bottom: 2px solid var(--secondary); display: inline-block; }
 
-        .card { background: var(--white); padding: 30px; border-radius: 15px; box-shadow: 0 5px 15px rgba(0,0,0,0.05); margin-bottom: 25px; }
-        
+        /* Forms */
+        .card { background: var(--white); padding: 30px; border-radius: 15px; box-shadow: 0 8px 20px rgba(0,0,0,0.06); margin-bottom: 25px; }
         .form-group { margin-bottom: 20px; }
-        .form-group label { display: block; margin-bottom: 8px; font-weight: 600; color: var(--primary); }
+        .form-group label { display: block; margin-bottom: 8px; font-weight: 700; color: #555; font-size: 0.9rem; }
         .form-control { 
-            width: 100%; padding: 12px 15px; border: 1px solid #ddd; 
-            border-radius: 8px; font-size: 15px; background: #fafafa;
+            width: 100%; padding: 12px 15px; border: 2px solid #eee; 
+            border-radius: 10px; font-size: 15px; outline: none;
         }
-        .form-control:focus { border-color: var(--primary); outline: none; background: #fff; }
+        .form-control:focus { border-color: var(--primary); background: #fdfdfd; }
 
-        .btn-submit {
+        .btn-main {
             background: var(--primary); color: white; border: none; width: 100%;
-            padding: 15px; border-radius: 8px; font-size: 18px; font-weight: bold;
-            cursor: pointer; position: relative; overflow: hidden;
+            padding: 16px; border-radius: 10px; font-size: 1.1rem; font-weight: bold;
+            cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px;
         }
-        .btn-submit:hover { transform: translateY(-3px); box-shadow: 0 5px 15px rgba(0,77,153,0.3); }
+        .btn-main:hover { transform: translateY(-2px); filter: brightness(1.1); }
 
-        /* Animation Classes */
-        .success-anim { display: none; text-align: center; animation: fadeIn 0.5s ease-in; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        /* Modern Select */
+        select.status-select {
+            padding: 8px 12px; border-radius: 8px; border: 2px solid #ddd; font-weight: bold; cursor: pointer;
+        }
+        select.status-select.pending { color: var(--info); border-color: var(--info); }
+        select.status-select.paid { color: var(--success); border-color: var(--success); }
+        select.status-select.failed { color: var(--danger); border-color: var(--danger); }
 
-        /* Admin Styles */
-        #admin-section { display: none; }
-        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 30px; }
-        .stat-item { padding: 20px; border-radius: 12px; color: white; text-align: center; }
-        
-        .table-container { overflow-x: auto; background: white; border-radius: 10px; }
+        /* Admin Table */
+        .table-wrapper { overflow-x: auto; border-radius: 12px; background: white; }
         table { width: 100%; border-collapse: collapse; min-width: 800px; }
-        th { background: var(--primary); color: white; padding: 15px; text-align: center; }
-        td { padding: 12px; border-bottom: 1px solid #eee; text-align: center; }
-        
-        .badge-time { padding: 5px 10px; border-radius: 5px; font-size: 12px; font-weight: bold; color: white; }
+        th { background: #f8f9fa; color: #666; padding: 15px; font-size: 0.85rem; text-transform: uppercase; text-align: center; }
+        td { padding: 15px; border-bottom: 1px solid #eee; text-align: center; font-weight: 600; }
+        .row-clickable { cursor: pointer; }
+        .row-clickable:hover { background: #f0f7ff; }
 
-        /* RTL/LTR Adjustments */
-        [dir="ltr"] .form-group label { text-align: left; }
-        [dir="ltr"] table th, [dir="ltr"] table td { text-align: center; }
+        /* Modal Details */
+        .modal { 
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+            background: rgba(0,0,0,0.7); z-index: 2000; justify-content: center; align-items: center;
+            backdrop-filter: blur(5px);
+        }
+        .modal-content { 
+            background: white; width: 90%; max-width: 600px; padding: 30px; border-radius: 20px; 
+            position: relative; max-height: 90vh; overflow-y: auto;
+        }
+        .close-modal { position: absolute; top: 15px; right: 15px; font-size: 24px; cursor: pointer; color: #999; }
+        .detail-row { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #eee; }
+        .recu-img { width: 100%; border-radius: 10px; margin-top: 15px; border: 1px solid #ddd; cursor: zoom-in; }
+
+        /* Badges */
+        .badge { padding: 4px 10px; border-radius: 6px; color: white; font-size: 11px; margin: 0 5px; }
+
+        /* Stats */
+        .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 15px; margin-bottom: 30px; }
+        .stat-card { padding: 20px; border-radius: 15px; color: white; text-align: center; position: relative; overflow: hidden; }
+        .stat-card h4 { margin: 0; opacity: 0.8; font-size: 14px; }
+        .stat-card h2 { margin: 5px 0 0; font-size: 28px; }
+
+        #success-anim { display: none; text-align: center; padding: 40px; }
     </style>
 </head>
 <body>
 
-    <div class="lang-switch">
-        <button class="btn-lang" onclick="toggleLanguage()" id="langBtn">Français</button>
+    <div class="top-nav">
+        <button class="btn-ui" onclick="toggleLang()" id="langBtn">Français</button>
+        <button class="btn-ui" onclick="window.location.hash='#09#'">Admin</button>
     </div>
 
     <div id="public-view" class="container">
         <div class="header">
-            <img src="https://play-lh.googleusercontent.com/4yxUE_wg_ljg1BRyO7BQ8l3siAyQZSeGx17OKyo0Y2Htt9A5oJEC7-zW0p4opjIbWQ=w600-h300-pc0xffffff-pd" alt="Logo" class="logo-img">
-            <h1 id="mainTitle">تأكيد الدفع</h1>
+            <img src="https://play-lh.googleusercontent.com/4yxUE_wg_ljg1BRyO7BQ8l3siAyQZSeGx17OKyo0Y2Htt9A5oJEC7-zW0p4opjIbWQ=w600-h300-pc0xffffff-pd" class="logo-img">
+            <h1 id="txt-title">تأكيد الدفع</h1>
         </div>
 
         <div class="check-card">
-            <h3 id="ourInfoTitle">معلومات الدفع الخاصة بنا</h3>
-            <hr style="border: 0.5px dashed var(--primary); opacity: 0.3;">
-            <p><strong id="lbl_ourName">الاسم الكامل:</strong> <span id="display_myName">جاري التحميل...</span></p>
-            <p><strong id="lbl_ourRip">رقم الحساب RIP:</strong> <span id="display_myRip">جاري التحميل...</span></p>
-            <p><strong id="lbl_ourAddr">العنوان:</strong> <span id="display_myAddr">جاري التحميل...</span></p>
+            <h3 id="txt-our-info">بيانات الدفع الخاصة بنا</h3>
+            <p><strong id="txt-lbl-name">الاسم الكامل:</strong> <span id="my-name-val">بريد الجزائر - قسم التكوين</span></p>
+            <p><strong id="txt-lbl-rip">رقم الحساب RIP:</strong> <span id="my-rip-val">007 99999 0000000000 12</span></p>
+            <p><strong id="txt-lbl-addr">العنوان:</strong> <span id="my-addr-val">الجزائر العاصمة</span></p>
         </div>
 
-        <div class="card" id="formContainer">
-            <form id="paymentForm">
+        <div class="card" id="form-card">
+            <form id="payForm">
                 <div class="form-group">
-                    <label id="lbl_formCourse">اسم الدورة</label>
-                    <input type="text" id="in_course" class="form-control" required>
+                    <label id="txt-f-course">اسم الدورة التدريبية</label>
+                    <input type="text" id="course" class="form-control" placeholder="مثلاً: دورة البرمجة" required>
                 </div>
                 <div class="form-group">
-                    <label id="lbl_formName">الاسم الكامل</label>
-                    <input type="text" id="in_name" class="form-control" required>
+                    <label id="txt-f-name">الاسم الكامل</label>
+                    <input type="text" id="fullname" class="form-control" required>
                 </div>
                 <div class="form-group">
-                    <label id="lbl_formPhone">رقم الهاتف</label>
-                    <input type="tel" id="in_phone" class="form-control" required>
+                    <label id="txt-f-phone">رقم الهاتف</label>
+                    <input type="tel" id="phone" class="form-control" required>
                 </div>
                 <div class="form-group">
-                    <label id="lbl_formWilaya">الولاية</label>
-                    <input type="text" id="in_wilaya" class="form-control" required>
+                    <label id="txt-f-wilaya">الولاية</label>
+                    <input type="text" id="wilaya" class="form-control" required>
                 </div>
                 <div class="form-group">
-                    <label id="lbl_formCcp">رقم الحساب البريدي</label>
-                    <input type="text" id="in_ccp" class="form-control" required>
+                    <label id="txt-f-ccp">رقم حسابك البريدي (الذي دفعت منه)</label>
+                    <input type="text" id="ccp" class="form-control" required>
                 </div>
                 <div class="form-group">
-                    <label id="lbl_formFile">رفع إثبات الدفع (Reçu)</label>
-                    <input type="file" id="in_file" class="form-control" accept="image/*" required>
+                    <label id="txt-f-file">تحميل وصل الدفع (Reçu)</label>
+                    <input type="file" id="receipt" class="form-control" accept="image/*" required>
                 </div>
-                <button type="submit" class="btn-submit" id="btnSubmit">تأكيد الدفع</button>
+                <button type="submit" class="btn-main" id="btn-submit">تأكيد الدفع</button>
             </form>
         </div>
 
-        <div id="successMsg" class="success-anim card">
-            <div style="font-size: 50px; color: var(--success);">✓</div>
-            <h2 id="successTitle">تم إرسال إثبات الدفع بنجاح</h2>
-            <p id="successNote" style="color: #d35400; font-weight: bold;"></p>
-        </div>
-
-        <div class="card">
-            <h3 id="reportTitle" style="color: var(--danger);">الإبلاغ عن مشكل</h3>
-            <form id="reportForm">
-                <div class="form-group"><input type="text" id="r_name" class="form-control" placeholder="الاسم" required></div>
-                <div class="form-group"><input type="email" id="r_email" class="form-control" placeholder="الإيمايل" required></div>
-                <div class="form-group"><textarea id="r_desc" class="form-control" placeholder="الوصف" rows="3" required></textarea></div>
-                <button type="submit" class="btn-submit" style="background: var(--danger);" id="btnReport">إرسال</button>
-            </form>
+        <div id="success-anim" class="card">
+            <div style="font-size: 60px;">✅</div>
+            <h2 id="txt-success-h">تم الإرسال بنجاح</h2>
+            <p id="txt-success-p" style="color: #e67e22; font-weight: bold;"></p>
         </div>
     </div>
 
-    <div id="login-view" class="container" style="display:none; max-width: 400px; margin-top: 100px;">
+    <div id="login-view" class="container" style="display:none; max-width: 400px; margin-top: 10% ;">
         <div class="card">
-            <h2 id="adminLoginTitle" style="text-align:center;">دخول الإدارة</h2>
-            <input type="password" id="adminPass" class="form-control" placeholder="****">
-            <button class="btn-submit" onclick="attemptLogin()" style="margin-top:15px;">Login</button>
+            <h2 style="text-align:center;">Admin Login</h2>
+            <input type="password" id="pass" class="form-control" placeholder="Password">
+            <button class="btn-main" onclick="doLogin()" style="margin-top:15px;">Login</button>
         </div>
     </div>
 
-    <div id="admin-section" class="container">
-        <h1 id="adminDashTitle">لوحة التحكم</h1>
-        <div class="stats-grid">
-            <div class="stat-item" style="background: #17a2b8;"><span id="stat_new_lbl">جديدة</span>: <span id="count_new">0</span></div>
-            <div class="stat-item" style="background: var(--primary);"><span id="stat_all_lbl">الكل</span>: <span id="count_all">0</span></div>
-            <div class="stat-item" style="background: var(--danger);"><span id="stat_fail_lbl">فاشلة</span>: <span id="count_fail">0</span></div>
+    <div id="admin-view" class="container" style="display:none;">
+        <div style="display:flex; justify-content: space-between; align-items: center;">
+            <h2 id="txt-dash">لوحة الإدارة</h2>
+            <button class="btn-ui" onclick="window.location.hash=''; location.reload();">Logout</button>
         </div>
 
-        <div class="card table-container">
-            <h3 id="tab_payments">جدول الدفعات</h3>
+        <div class="stats">
+            <div class="stat-card" style="background: var(--info);">
+                <h4 id="st-new">جديدة</h4><h2 id="count-new">0</h2>
+            </div>
+            <div class="stat-card" style="background: var(--primary);">
+                <h4 id="st-all">الكل</h4><h2 id="count-all">0</h2>
+            </div>
+            <div class="stat-card" style="background: var(--danger);">
+                <h4 id="st-fail">فاشلة</h4><h2 id="count-fail">0</h2>
+            </div>
+        </div>
+
+        <div class="table-wrapper">
             <table>
                 <thead>
                     <tr>
-                        <th id="th_date">التاريخ</th>
-                        <th id="th_course">الدورة</th>
-                        <th id="th_name">الاسم</th>
-                        <th id="th_phone">الهاتف</th>
-                        <th id="th_status">الحالة</th>
+                        <th id="th-date">التاريخ</th>
+                        <th id="th-course">الدورة</th>
+                        <th id="th-name">الاسم</th>
+                        <th id="th-status">الحالة</th>
                     </tr>
                 </thead>
-                <tbody id="admin_pay_body"></tbody>
+                <tbody id="pay-body"></tbody>
             </table>
         </div>
-        
-        <button class="btn-lang" onclick="window.location.hash=''" style="width: 100%;">Logout</button>
+    </div>
+
+    <div id="detailsModal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal" onclick="closeModal()">&times;</span>
+            <h3 id="txt-det-title" style="color:var(--primary); border-bottom: 2px solid #eee; padding-bottom: 10px;">تفاصيل الدفع</h3>
+            <div id="modal-body"></div>
+        </div>
     </div>
 
     <script>
         // --- Translations ---
         const i18n = {
             ar: {
-                dir: 'rtl', langBtn: 'Français', mainTitle: 'تأكيد الدفع',
-                ourInfoTitle: 'معلومات الدفع الخاصة بنا', lbl_ourName: 'الاسم الكامل:',
-                lbl_ourRip: 'رقم الحساب RIP:', lbl_ourAddr: 'العنوان:',
-                lbl_formCourse: 'اسم الدورة', lbl_formName: 'الاسم الكامل',
-                lbl_formPhone: 'رقم الهاتف', lbl_formWilaya: 'الولاية',
-                lbl_formCcp: 'رقم الحساب البريدي', lbl_formFile: 'رفع إثبات الدفع (Reçu)',
-                btnSubmit: 'تأكيد الدفع', successTitle: 'تم إرسال إثبات الدفع بنجاح',
-                successNote: 'سيتم التأكد من طلبكم في ظرف 24 سا إلى 48 سا ، سنتصل بكم فور التأكد من أن دفعكم صحيح',
-                reportTitle: 'الإبلاغ عن مشكل', btnReport: 'إرسال الإبلاغ',
-                adminDashTitle: 'لوحة التحكم', stat_new_lbl: 'دفعات جديدة',
-                stat_all_lbl: 'جميع الدفعات', stat_fail_lbl: 'دفع فاشل',
-                tab_payments: 'جدول الدفعات', th_date: 'التاريخ', th_course: 'الدورة',
-                th_name: 'الاسم', th_phone: 'الهاتف', th_status: 'الحالة',
-                status_pending: 'قيد المراجعة', status_paid: 'مدفوع', status_failed: 'فاشل'
+                txtTitle: "تأكيد الدفع", txtOurInfo: "بيانات الدفع الخاصة بنا", 
+                txtLblName: "الاسم الكامل:", txtLblRip: "رقم الحساب RIP:", txtLblAddr: "العنوان:",
+                txtFCourse: "اسم الدورة التدريبية", txtFName: "الاسم الكامل", txtFPhone: "رقم الهاتف",
+                txtFWilaya: "الولاية", txtFCcp: "رقم حسابك البريدي", txtFFile: "تحميل وصل الدفع (Reçu)",
+                btnSubmit: "تأكيد الدفع", txtSuccessH: "تم الإرسال بنجاح",
+                txtSuccessP: "سيتم التأكد من طلبكم في ظرف 24 سا إلى 48 سا ، سنتصل بكم فور التأكد من أن دفعكم صحيح",
+                txtDash: "لوحة التحكم الإدارية", stNew: "دفعات جديدة", stAll: "جميع الدفعات", stFail: "دفعات فاشلة",
+                thDate: "التاريخ", thCourse: "الدورة", thName: "الاسم", thStatus: "الحالة",
+                detTitle: "تفاصيل الطلب الكاملة", s_p: "قيد المراجعة", s_v: "مدفوع", s_f: "فاشل"
             },
             fr: {
-                dir: 'ltr', langBtn: 'العربية', mainTitle: 'Confirmation de Paiement',
-                ourInfoTitle: 'Nos Informations de Paiement', lbl_ourName: 'Nom Complet:',
-                lbl_ourRip: 'Numéro RIP:', lbl_ourAddr: 'Adresse:',
-                lbl_formCourse: 'Nom de la Formation', lbl_formName: 'Nom Complet',
-                lbl_formPhone: 'N° Téléphone', lbl_formWilaya: 'Wilaya',
-                lbl_formCcp: 'Numéro de Compte (CCP)', lbl_formFile: 'Preuve de paiement (Reçu)',
-                btnSubmit: 'Confirmer le Paiement', successTitle: 'Preuve envoyée avec succès',
-                successNote: 'Votre demande sera vérifiée dans 24h à 48h. Nous vous contacterons dès confirmation.',
-                reportTitle: 'Signaler un problème', btnReport: 'Envoyer',
-                adminDashTitle: 'Tableau de Bord', stat_new_lbl: 'Nouveaux',
-                stat_all_lbl: 'Total', stat_fail_lbl: 'Échoués',
-                tab_payments: 'Liste des Paiements', th_date: 'Date', th_course: 'Formation',
-                th_name: 'Nom', th_phone: 'Tél', th_status: 'Statut',
-                status_pending: 'En attente', status_paid: 'Payé', status_failed: 'Échoué'
+                txtTitle: "Confirmation de Paiement", txtOurInfo: "Nos coordonnées de paiement",
+                txtLblName: "Nom Complet:", txtLblRip: "N° RIP:", txtLblAddr: "Adresse:",
+                txtFCourse: "Nom de la Formation", txtFName: "Nom Complet", txtFPhone: "N° Téléphone",
+                txtFWilaya: "Wilaya", txtFCcp: "N° de votre compte", txtFFile: "Preuve de paiement (Reçu)",
+                btnSubmit: "Confirmer le Paiement", txtSuccessH: "Envoyé avec succès",
+                txtSuccessP: "Votre demande sera vérifiée sous 24h à 48h. Nous vous contacterons bientôt.",
+                txtDash: "Tableau de Bord Admin", stNew: "Nouveaux", stAll: "Total", stFail: "Échoués",
+                thDate: "Date", thCourse: "Formation", thName: "Nom", thStatus: "Statut",
+                detTitle: "Détails complets du paiement", s_p: "En attente", s_v: "Validé", s_f: "Échoué"
             }
         };
 
-        let currentLang = 'ar';
-        let myInfo = JSON.parse(localStorage.getItem('myInfo_v2')) || { name: 'بريد الجزائر / مؤسسة التدريب', rip: '007 99999 0000000000 12', address: 'الجزائر العاصمة، ساحة الشهداء' };
-        let payments = JSON.parse(localStorage.getItem('payments_v2')) || [];
+        let lang = 'ar';
+        let payments = JSON.parse(localStorage.getItem('payments_v3')) || [];
 
-        function updateUI() {
-            const lang = i18n[currentLang];
-            document.getElementById('html-tag').dir = lang.dir;
-            document.getElementById('langBtn').innerText = lang.langBtn;
-            
-            // Loop through translation keys
-            Object.keys(lang).forEach(key => {
-                const el = document.getElementById(key);
-                if (el) el.innerText = lang[key];
-            });
-
-            // Specific UI Updates
-            document.getElementById('display_myName').innerText = myInfo.name;
-            document.getElementById('display_myRip').innerText = myInfo.rip;
-            document.getElementById('display_myAddr').innerText = myInfo.address;
-        }
-
-        function toggleLanguage() {
-            currentLang = currentLang === 'ar' ? 'fr' : 'ar';
-            updateUI();
+        function toggleLang() {
+            lang = lang === 'ar' ? 'fr' : 'ar';
+            const html = document.getElementById('html-tag');
+            html.dir = lang === 'ar' ? 'rtl' : 'ltr';
+            html.lang = lang;
+            document.getElementById('langBtn').innerText = lang === 'ar' ? 'Français' : 'العربية';
+            refreshLangTexts();
             if(window.location.hash === '#09#') renderAdmin();
         }
 
-        // --- Navigation ---
-        function checkRoute() {
-            const hash = window.location.hash;
-            document.getElementById('public-view').style.display = 'none';
-            document.getElementById('login-view').style.display = 'none';
-            document.getElementById('admin-section').style.display = 'none';
-
-            if (hash === '#09#') {
-                if(sessionStorage.getItem('isAdmin') === 'true') {
-                    document.getElementById('admin-section').style.display = 'block';
-                    renderAdmin();
-                } else {
-                    document.getElementById('login-view').style.display = 'block';
-                }
-            } else {
-                document.getElementById('public-view').style.display = 'block';
+        function refreshLangTexts() {
+            const t = i18n[lang];
+            document.getElementById('txt-title').innerText = t.txtTitle;
+            document.getElementById('txt-our-info').innerText = t.txtOurInfo;
+            document.getElementById('txt-lbl-name').innerText = t.txtLblName;
+            document.getElementById('txt-lbl-rip').innerText = t.txtLblRip;
+            document.getElementById('txt-lbl-addr').innerText = t.txtLblAddr;
+            document.getElementById('txt-f-course').innerText = t.txtFCourse;
+            document.getElementById('txt-f-name').innerText = t.txtFName;
+            document.getElementById('txt-f-phone').innerText = t.txtFPhone;
+            document.getElementById('txt-f-wilaya').innerText = t.txtFWilaya;
+            document.getElementById('txt-f-ccp').innerText = t.txtFCcp;
+            document.getElementById('txt-f-file').innerText = t.txtFFile;
+            document.getElementById('btn-submit').innerText = t.btnSubmit;
+            document.getElementById('txt-success-h').innerText = t.txtSuccessH;
+            document.getElementById('txt-success-p').innerText = t.txtSuccessP;
+            // Admin
+            if(document.getElementById('admin-view').style.display !== 'none') {
+                document.getElementById('txt-dash').innerText = t.txtDash;
+                document.getElementById('st-new').innerText = t.stNew;
+                document.getElementById('st-all').innerText = t.stAll;
+                document.getElementById('st-fail').innerText = t.stFail;
+                document.getElementById('th-date').innerText = t.thDate;
+                document.getElementById('th-course').innerText = t.thCourse;
+                document.getElementById('th-name').innerText = t.thName;
+                document.getElementById('th-status').innerText = t.thStatus;
             }
         }
 
-        window.onhashchange = checkRoute;
-        window.onload = () => { updateUI(); checkRoute(); };
+        // --- Logic ---
+        document.getElementById('payForm').onsubmit = function(e) {
+            e.preventDefault();
+            const fileInput = document.getElementById('receipt');
+            const reader = new FileReader();
+            
+            reader.onload = function() {
+                const newPay = {
+                    id: Date.now(),
+                    timestamp: Date.now(),
+                    date: new Date().toLocaleString(lang === 'ar' ? 'ar-DZ' : 'fr-FR'),
+                    course: document.getElementById('course').value,
+                    name: document.getElementById('fullname').value,
+                    phone: document.getElementById('phone').value,
+                    wilaya: document.getElementById('wilaya').value,
+                    ccp: document.getElementById('ccp').value,
+                    image: reader.result,
+                    status: 'pending'
+                };
+                payments.push(newPay);
+                localStorage.setItem('payments_v3', JSON.stringify(payments));
+                document.getElementById('form-card').style.display = 'none';
+                document.getElementById('success-anim').style.display = 'block';
+            };
+            reader.readAsDataURL(fileInput.files[0]);
+        };
 
-        function attemptLogin() {
-            if(document.getElementById('adminPass').value === '#abobob2026#') {
+        function checkRoute() {
+            const h = window.location.hash;
+            document.getElementById('public-view').style.display = h === '#09#' ? 'none' : 'block';
+            document.getElementById('login-view').style.display = h === '#09#' && !sessionStorage.getItem('isAdmin') ? 'block' : 'none';
+            document.getElementById('admin-view').style.display = h === '#09#' && sessionStorage.getItem('isAdmin') ? 'block' : 'none';
+            if(h === '#09#' && sessionStorage.getItem('isAdmin')) renderAdmin();
+        }
+        window.onhashchange = checkRoute;
+        window.onload = checkRoute;
+
+        function doLogin() {
+            if(document.getElementById('pass').value === '#abobob2026#') {
                 sessionStorage.setItem('isAdmin', 'true');
                 checkRoute();
-            } else { alert('Error!'); }
+            } else alert('Error');
         }
-
-        // --- Logic ---
-        document.getElementById('paymentForm').onsubmit = function(e) {
-            e.preventDefault();
-            const pay = {
-                id: Date.now(),
-                timestamp: Date.now(),
-                date: new Date().toLocaleString(),
-                course: document.getElementById('in_course').value,
-                name: document.getElementById('in_name').value,
-                phone: document.getElementById('in_phone').value,
-                status: 'pending'
-            };
-            payments.push(pay);
-            localStorage.setItem('payments_v2', JSON.stringify(payments));
-            document.getElementById('formContainer').style.display = 'none';
-            document.getElementById('successMsg').style.display = 'block';
-        };
 
         function renderAdmin() {
             const now = Date.now();
-            const tbody = document.getElementById('admin_pay_body');
-            tbody.innerHTML = '';
-            
-            let countNew = 0, countFail = 0;
+            const body = document.getElementById('pay-body');
+            body.innerHTML = '';
+            let n=0, a=payments.length, f=0;
 
             payments.forEach(p => {
-                const diffHrs = Math.floor((now - p.timestamp) / (1000 * 60 * 60));
+                const diff = Math.floor((now - p.timestamp) / 3600000);
                 if(p.status === 'pending') {
-                    countNew++;
-                    if(diffHrs >= 48) p.status = 'failed';
+                    n++;
+                    if(diff >= 48) p.status = 'failed';
                 }
-                if(p.status === 'failed') countFail++;
+                if(p.status === 'failed') f++;
 
-                let timeColor = '#28a745';
-                if(diffHrs >= 24) timeColor = '#ffc107';
-                if(diffHrs >= 48) timeColor = '#dc3545';
+                let timerCol = diff < 24 ? 'var(--success)' : (diff < 48 ? 'var(--warning)' : 'var(--danger)');
+                const badge = p.status === 'pending' ? `<span class="badge" style="background:${timerCol}">${diff}h</span>` : '';
 
-                const badge = p.status === 'pending' ? `<span class="badge-time" style="background:${timeColor}">${diffHrs}h</span>` : '';
-
-                tbody.innerHTML += `
-                    <tr>
-                        <td>${p.date}</td>
-                        <td>${p.course}</td>
-                        <td>${p.name}</td>
-                        <td>${p.phone}</td>
-                        <td>
-                            ${badge}
-                            <select onchange="updateStatus(${p.id}, this.value)">
-                                <option value="pending" ${p.status==='pending'?'selected':''}>${i18n[currentLang].status_pending}</option>
-                                <option value="paid" ${p.status==='paid'?'selected':''}>${i18n[currentLang].status_paid}</option>
-                                <option value="failed" ${p.status==='failed'?'selected':''}>${i18n[currentLang].status_failed}</option>
-                            </select>
-                        </td>
-                    </tr>
+                const row = document.createElement('tr');
+                row.className = 'row-clickable';
+                row.innerHTML = `
+                    <td onclick="showDetails(${p.id})">${p.date}</td>
+                    <td onclick="showDetails(${p.id})">${p.course}</td>
+                    <td onclick="showDetails(${p.id})">${p.name}</td>
+                    <td>
+                        ${badge}
+                        <select class="status-select ${p.status}" onchange="updateStat(${p.id}, this.value)">
+                            <option value="pending" ${p.status==='pending'?'selected':''}>${i18n[lang].s_p}</option>
+                            <option value="paid" ${p.status==='paid'?'selected':''}>${i18n[lang].s_v}</option>
+                            <option value="failed" ${p.status==='failed'?'selected':''}>${i18n[lang].s_f}</option>
+                        </select>
+                    </td>
                 `;
+                body.appendChild(row);
             });
-
-            document.getElementById('count_all').innerText = payments.length;
-            document.getElementById('count_new').innerText = countNew;
-            document.getElementById('count_fail').innerText = countFail;
+            document.getElementById('count-new').innerText = n;
+            document.getElementById('count-all').innerText = a;
+            document.getElementById('count-fail').innerText = f;
+            refreshLangTexts();
         }
 
-        function updateStatus(id, newStatus) {
-            const idx = payments.findIndex(x => x.id === id);
-            payments[idx].status = newStatus;
-            localStorage.setItem('payments_v2', JSON.stringify(payments));
+        function updateStat(id, val) {
+            const i = payments.findIndex(x => x.id === id);
+            payments[i].status = val;
+            localStorage.setItem('payments_v3', JSON.stringify(payments));
             renderAdmin();
         }
+
+        function showDetails(id) {
+            const p = payments.find(x => x.id === id);
+            const mBody = document.getElementById('modal-body');
+            mBody.innerHTML = `
+                <div class="detail-row"><span>التاريخ:</span> <b>${p.date}</b></div>
+                <div class="detail-row"><span>الدورة:</span> <b>${p.course}</b></div>
+                <div class="detail-row"><span>الاسم الكامل:</span> <b>${p.name}</b></div>
+                <div class="detail-row"><span>الهاتف:</span> <b>${p.phone}</b></div>
+                <div class="detail-row"><span>الولاية:</span> <b>${p.wilaya}</b></div>
+                <div class="detail-row"><span>حساب المرسل:</span> <b>${p.ccp}</b></div>
+                <div style="margin-top:15px; text-align:center;">
+                    <p>وصل الدفع (إضغط للتكبير):</p>
+                    <a href="${p.image}" download="recu_${p.name}.png">
+                        <img src="${p.image}" class="recu-img" title="Click to download">
+                    </a>
+                    <p style="font-size:12px; color:gray;">(يمكنك تحميل الصورة بالضغط عليها)</p>
+                </div>
+            `;
+            document.getElementById('detailsModal').style.display = 'flex';
+        }
+
+        function closeModal() { document.getElementById('detailsModal').style.display = 'none'; }
+        window.onclick = (e) => { if(e.target.className === 'modal') closeModal(); }
     </script>
 </body>
 </html>
