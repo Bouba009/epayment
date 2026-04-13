@@ -15,7 +15,7 @@
         :root {
             --primary-blue: #0056b3;
             --primary-dark: #003d82;
-            --cheque-yellow: #fff3cd;
+            --cheque-bg: linear-gradient(135deg, #fff9e6 0%, #fff3cd 100%);
             --success-green: #28a745;
             --warning-orange: #fd7e14;
             --danger-red: #dc3545;
@@ -26,22 +26,43 @@
             --box-shadow: 0 4px 15px rgba(0,0,0,0.1);
         }
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Cairo', sans-serif; }
-        body { background-color: var(--bg-light); color: var(--text-dark); transition: all 0.3s ease; }
+        body { background-color: var(--bg-light); color: var(--text-dark); overflow-x: hidden; }
         
         /* Layout */
-        .app-container { display: flex; min-height: 100vh; }
+        .app-container { display: flex; min-height: 100vh; flex-direction: column; }
         
-        /* Sidebar */
-        .sidebar { width: 250px; background: #fff; box-shadow: var(--box-shadow); padding: 20px 0; display: flex; flex-direction: column; transition: 0.3s; z-index: 1000;}
-        .sidebar-logo { text-align: center; font-size: 28px; font-weight: 800; color: var(--primary-blue); margin-bottom: 30px; letter-spacing: 1px;}
-        .sidebar-logo i { color: var(--success-green); font-size: 22px; margin-right: 5px;}
-        .sidebar a { display: block; padding: 15px 20px; color: var(--text-dark); text-decoration: none; font-weight: 600; border-bottom: 1px solid #eee; transition: 0.3s; cursor: pointer;}
-        .sidebar a:hover { background: var(--primary-blue); color: #fff; padding-right: 25px; }
+        /* --- New Sidebar & Overlay Logic (Hidden on Left) --- */
+        .sidebar-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.5); z-index: 1040; display: none; opacity: 0; transition: opacity 0.3s; }
+        .sidebar-overlay.active { display: block; opacity: 1; }
+
+        .sidebar { position: fixed; top: 0; left: -280px; /* Hidden on the left strictly */ width: 280px; height: 100vh; background: #fff; box-shadow: 2px 0 15px rgba(0,0,0,0.2); padding: 20px 0; display: flex; flex-direction: column; transition: left 0.4s cubic-bezier(0.4, 0, 0.2, 1); z-index: 1050; overflow-y: auto;}
+        .sidebar.open { left: 0; }
+        
+        /* Logo Continuous Animation */
+        @keyframes pulseLogo {
+            0% { transform: scale(1); filter: drop-shadow(0 0 5px rgba(0,86,179,0.3)); }
+            50% { transform: scale(1.05); filter: drop-shadow(0 0 15px rgba(0,86,179,0.6)); }
+            100% { transform: scale(1); filter: drop-shadow(0 0 5px rgba(0,86,179,0.3)); }
+        }
+        .sidebar-logo { text-align: center; font-size: 32px; font-weight: 800; color: var(--primary-blue); margin-bottom: 30px; letter-spacing: 1px; animation: pulseLogo 2.5s infinite ease-in-out; display: flex; justify-content: center; align-items: center; gap: 8px;}
+        .sidebar-logo i { color: var(--success-green); font-size: 26px; }
+        
+        .sidebar a { display: block; padding: 15px 25px; color: var(--text-dark); text-decoration: none; font-weight: 600; border-bottom: 1px solid #eee; transition: 0.3s; cursor: pointer;}
+        .sidebar a:hover { background: var(--primary-blue); color: #fff; padding-left: 35px; } /* Hover moves inward */
         
         /* Main Content */
-        .main-content { flex: 1; padding: 20px; overflow-y: auto; }
-        .header { display: flex; justify-content: space-between; align-items: center; background: #fff; padding: 15px 20px; border-radius: var(--border-radius); box-shadow: var(--box-shadow); margin-bottom: 20px; }
-        .lang-switch button { padding: 5px 15px; border: 1px solid var(--primary-blue); background: transparent; color: var(--primary-blue); border-radius: 20px; cursor: pointer; transition: 0.3s; font-weight: bold;}
+        .main-content { flex: 1; padding: 20px; width: 100%; max-width: 1200px; margin: 0 auto; transition: 0.3s; }
+        
+        .header { display: flex; justify-content: space-between; align-items: center; background: #fff; padding: 15px 20px; border-radius: var(--border-radius); box-shadow: var(--box-shadow); margin-bottom: 20px; position: sticky; top: 10px; z-index: 1000;}
+        .header-left { display: flex; align-items: center; gap: 15px; }
+        
+        /* Menu Button */
+        .menu-btn { background: var(--primary-blue); color: #fff; border: none; width: 40px; height: 40px; border-radius: 5px; font-size: 20px; cursor: pointer; display: flex; justify-content: center; align-items: center; transition: 0.3s; box-shadow: 0 2px 5px rgba(0,0,0,0.2);}
+        .menu-btn:hover { background: var(--primary-dark); transform: scale(1.05); }
+
+        #pageTitle { color: var(--primary-blue); font-weight: 800; font-size: 22px;}
+
+        .lang-switch button { padding: 5px 15px; border: 1px solid var(--primary-blue); background: transparent; color: var(--primary-blue); border-radius: 20px; cursor: pointer; transition: 0.3s; font-weight: bold; margin: 0 2px;}
         .lang-switch button.active { background: var(--primary-blue); color: #fff; }
 
         /* Views */
@@ -49,102 +70,134 @@
         .view-section.active { display: block; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* Public Form & Cheque */
-        .cheque-card { background: var(--cheque-yellow); border: 2px dashed #ccc; border-radius: 10px; padding: 20px; margin: 20px 0; position: relative; box-shadow: inset 0 0 10px rgba(0,0,0,0.05); }
-        .cheque-card::before { content: "Algérie Poste"; position: absolute; opacity: 0.1; font-size: 40px; font-weight: bold; top: 50%; left: 50%; transform: translate(-50%, -50%) rotate(-15deg); pointer-events: none;}
-        .cheque-info p { margin-bottom: 10px; font-size: 16px; font-weight: bold;}
-        .cheque-info span { font-weight: normal; color: var(--primary-blue); font-size: 18px;}
+        /* --- Professional Cheque UI --- */
+        .cheque-card { background: var(--cheque-bg); border: 1px solid #d4c08c; border-radius: 12px; padding: 25px; margin: 20px 0; position: relative; box-shadow: inset 0 0 20px rgba(200,180,100,0.2), 0 5px 15px rgba(0,0,0,0.08); overflow: hidden; }
+        /* Micro-print border simulation */
+        .cheque-card::before { content: ""; position: absolute; top: 5px; left: 5px; right: 5px; bottom: 5px; border: 1px dashed rgba(0,0,0,0.1); pointer-events: none; border-radius: 8px;}
+        /* Watermark */
+        .cheque-card::after { content: "Algérie Poste"; position: absolute; opacity: 0.05; font-size: 50px; font-weight: 900; top: 50%; left: 50%; transform: translate(-50%, -50%) rotate(-20deg); pointer-events: none; color: var(--primary-blue);}
         
-        .form-group { margin-bottom: 15px; }
-        .form-group label { display: block; margin-bottom: 5px; font-weight: 600; }
-        .form-control { width: 100%; padding: 10px 15px; border: 1px solid #ccc; border-radius: var(--border-radius); outline: none; transition: 0.3s; font-family: 'Cairo';}
-        .form-control:focus { border-color: var(--primary-blue); box-shadow: 0 0 5px rgba(0,86,179,0.3); }
+        .cheque-header-text { font-size: 12px; font-weight: bold; color: #555; border-bottom: 2px solid var(--primary-blue); padding-bottom: 5px; margin-bottom: 15px; text-transform: uppercase; letter-spacing: 1px;}
         
-        .btn-submit { background: var(--primary-blue); color: #fff; border: none; padding: 12px 25px; border-radius: 30px; font-size: 18px; font-weight: bold; cursor: pointer; width: 100%; transition: all 0.3s; position: relative; overflow: hidden; }
-        .btn-submit:hover { background: var(--primary-dark); transform: translateY(-2px); box-shadow: 0 5px 15px rgba(0,86,179,0.4); }
-        .disclaimer { font-size: 13px; color: var(--danger-red); text-align: center; margin-top: 15px; font-weight: bold; }
+        .cheque-info { position: relative; z-index: 2; }
+        .cheque-info p { margin-bottom: 12px; font-size: 16px; font-weight: bold; display: flex; align-items: center; flex-wrap: wrap; gap: 10px;}
+        .cheque-value { font-weight: 800; color: var(--primary-dark); font-size: 18px; background: rgba(255,255,255,0.7); padding: 4px 10px; border-radius: 4px; letter-spacing: 0.5px; border-bottom: 1px dotted #888;}
+        
+        .copy-btn { background: var(--primary-blue); color: #fff; border: none; padding: 5px 12px; border-radius: 4px; cursor: pointer; font-size: 14px; transition: 0.3s; display: inline-flex; align-items: center; gap: 5px;}
+        .copy-btn:hover { background: var(--primary-dark); transform: translateY(-2px); }
+
+        /* Public Form */
+        .form-container { background: #fff; padding: 25px; border-radius: 12px; box-shadow: var(--box-shadow); border-top: 4px solid var(--primary-blue); }
+        .form-group { margin-bottom: 18px; }
+        .form-group label { display: block; margin-bottom: 8px; font-weight: 700; color: #444; }
+        .form-control { width: 100%; padding: 12px 15px; border: 1px solid #ddd; border-radius: var(--border-radius); outline: none; transition: 0.3s; font-family: 'Cairo'; background: #fafafa;}
+        .form-control:focus { border-color: var(--primary-blue); box-shadow: 0 0 0 3px rgba(0,86,179,0.1); background: #fff;}
+        
+        .btn-submit { background: var(--primary-blue); color: #fff; border: none; padding: 14px 25px; border-radius: 30px; font-size: 18px; font-weight: 800; cursor: pointer; width: 100%; transition: all 0.3s; box-shadow: 0 4px 10px rgba(0,86,179,0.3); display: flex; justify-content: center; align-items: center; gap: 10px;}
+        .btn-submit:hover { background: var(--primary-dark); transform: translateY(-3px); box-shadow: 0 6px 15px rgba(0,86,179,0.4); }
+        
+        .disclaimer { font-size: 14px; color: var(--danger-red); text-align: center; margin-top: 20px; font-weight: 800; background: rgba(220,53,69,0.1); padding: 10px; border-radius: 5px; border: 1px dashed var(--danger-red);}
 
         /* Image Display */
-        .alg-poste-img { width: 100%; max-width: 400px; border-radius: 10px; display: block; margin: 0 auto 20px auto; box-shadow: var(--box-shadow); }
+        .alg-poste-img { width: 100%; max-width: 450px; border-radius: 12px; display: block; margin: 0 auto 25px auto; box-shadow: var(--box-shadow); border: 2px solid #fff; }
 
-        /* Admin Dashboard */
+        /* Admin Dashboard & General UI */
         .dash-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 20px; }
-        .card { padding: 20px; border-radius: var(--border-radius); color: #fff; box-shadow: var(--box-shadow); text-align: center; }
-        .card h3 { font-size: 30px; margin-bottom: 5px; }
-        .c-blue { background: linear-gradient(45deg, #0056b3, #00aaff); }
-        .c-green { background: linear-gradient(45deg, #28a745, #5cd675); }
-        .c-orange { background: linear-gradient(45deg, #fd7e14, #ffb366); }
-        .c-red { background: linear-gradient(45deg, #dc3545, #ff6b7a); }
-        .c-purple { background: linear-gradient(45deg, #6f42c1, #b388ff); }
+        .card { padding: 20px; border-radius: var(--border-radius); color: #fff; box-shadow: var(--box-shadow); text-align: center; transition: 0.3s;}
+        .card:hover { transform: translateY(-5px); }
+        .card h3 { font-size: 32px; margin-bottom: 5px; font-weight: 800;}
+        .c-blue { background: linear-gradient(135deg, #0056b3, #00aaff); }
+        .c-green { background: linear-gradient(135deg, #28a745, #5cd675); }
+        .c-orange { background: linear-gradient(135deg, #fd7e14, #ffb366); }
+        .c-red { background: linear-gradient(135deg, #dc3545, #ff6b7a); }
+        .c-purple { background: linear-gradient(135deg, #6f42c1, #b388ff); }
 
         /* Tables */
         .table-responsive { overflow-x: auto; background: #fff; border-radius: var(--border-radius); padding: 15px; box-shadow: var(--box-shadow); margin-bottom: 20px;}
-        table { width: 100%; border-collapse: collapse; }
-        table th, table td { padding: 12px; border-bottom: 1px solid #eee; text-align: right; }
+        table { width: 100%; border-collapse: collapse; white-space: nowrap; }
+        table th, table td { padding: 12px 15px; border-bottom: 1px solid #eee; text-align: right; }
         table th { background: var(--primary-blue); color: #fff; font-weight: bold; }
+        table tr:hover td { background-color: #f8f9fa; }
         
-        .status-badge { padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: bold; color: #fff; }
+        .status-badge { padding: 5px 12px; border-radius: 20px; font-size: 12px; font-weight: bold; color: #fff; display: inline-block;}
         .bg-green { background: var(--success-green); }
         .bg-orange { background: var(--warning-orange); }
         .bg-red { background: var(--danger-red); }
         .bg-blue { background: var(--primary-blue); }
         .bg-gray { background: #6c757d; }
 
-        .btn-action { padding: 5px 10px; border: none; border-radius: 5px; cursor: pointer; color: #fff; font-size: 12px; margin: 2px;}
+        .btn-action { padding: 6px 12px; border: none; border-radius: 5px; cursor: pointer; color: #fff; font-size: 13px; margin: 2px; font-weight: bold; transition: 0.2s;}
+        .btn-action:hover { opacity: 0.8; }
 
         /* Admin Tabs */
-        .admin-tabs { display: flex; gap: 10px; margin-bottom: 20px; overflow-x: auto; }
-        .admin-tabs button { padding: 10px 20px; border: none; background: #ddd; border-radius: 5px; cursor: pointer; font-weight: bold; white-space: nowrap;}
-        .admin-tabs button.active { background: var(--primary-blue); color: #fff; }
+        .admin-tabs { display: flex; gap: 10px; margin-bottom: 20px; overflow-x: auto; padding-bottom: 5px;}
+        .admin-tabs::-webkit-scrollbar { height: 5px; }
+        .admin-tabs::-webkit-scrollbar-thumb { background: #ccc; border-radius: 5px; }
+        .admin-tabs button { padding: 10px 20px; border: none; background: #e9ecef; border-radius: 5px; cursor: pointer; font-weight: bold; white-space: nowrap; transition: 0.3s; color: #555;}
+        .admin-tabs button.active { background: var(--primary-blue); color: #fff; box-shadow: 0 3px 8px rgba(0,86,179,0.3);}
         .admin-tab-content { display: none; }
         .admin-tab-content.active { display: block; animation: fadeIn 0.3s ease;}
 
         /* Dual Language Inputs */
         .dual-input { display: flex; gap: 15px; }
         .dual-input .form-group { flex: 1; }
-        .ar-label::after { content: ' (AR)'; color: #888; font-size: 12px; }
-        .fr-label::after { content: ' (FR)'; color: #888; font-size: 12px; }
+        .ar-label::after { content: ' (العربية)'; color: #888; font-size: 12px; margin-right: 5px; font-weight: normal;}
+        .fr-label::after { content: ' (Français)'; color: #888; font-size: 12px; margin-right: 5px; font-weight: normal;}
 
         /* Login Screen */
-        .login-container { max-width: 400px; margin: 50px auto; background: #fff; padding: 30px; border-radius: 10px; box-shadow: var(--box-shadow); }
+        .login-container { max-width: 420px; margin: 40px auto; background: #fff; padding: 35px 30px; border-radius: 12px; box-shadow: var(--box-shadow); border-top: 4px solid var(--primary-blue);}
 
         [dir="ltr"] table th, [dir="ltr"] table td { text-align: left; }
-        [dir="ltr"] .sidebar a:hover { padding-right: 20px; padding-left: 25px; }
+        [dir="ltr"] .ar-label::after { margin-left: 5px; margin-right: 0;}
+        [dir="ltr"] .fr-label::after { margin-left: 5px; margin-right: 0;}
         
+        /* Mobile Adjustments */
         @media(max-width: 768px) {
-            .app-container { flex-direction: column; }
-            .sidebar { width: 100%; padding: 10px 0; }
-            .sidebar a { padding: 10px; }
+            .header { padding: 12px 15px; }
+            #pageTitle { font-size: 18px; }
+            .menu-btn { width: 35px; height: 35px; font-size: 18px;}
+            .main-content { padding: 10px; }
+            .cheque-card { padding: 15px; }
+            .cheque-info p { font-size: 14px; }
+            .cheque-value { font-size: 16px; }
             .dual-input { flex-direction: column; gap: 0; }
+            .admin-tabs button { padding: 8px 15px; font-size: 14px;}
         }
     </style>
 </head>
 <body>
 
 <div class="app-container">
-    <!-- Sidebar -->
-    <aside class="sidebar">
+    <!-- Overlay for closing sidebar on mobile/desktop clicking outside -->
+    <div id="sidebarOverlay" class="sidebar-overlay" onclick="toggleMenu()"></div>
+
+    <!-- Sidebar (Hidden on Left) -->
+    <aside class="sidebar" id="sidebar">
         <div class="sidebar-logo">
             <i class="fas fa-check-circle"></i>Prouver
         </div>
         <nav id="sidebarMenu">
-            <a onclick="navigate('home')" data-i18n="nav_home">تأكيد الدفع</a>
-            <a onclick="navigate('about')" data-i18n="nav_about">من نحن</a>
-            <a onclick="navigate('privacy')" data-i18n="nav_privacy">سياسة الخصوصية</a>
-            <a onclick="openReportModal()" data-i18n="nav_report">الإبلاغ عن مشكل</a>
-            <a onclick="navigate('commercial')" data-i18n="nav_commercial">حساب تجاري</a>
-            <a onclick="navigate('admin_login')" id="adminLink" style="display:none;">لوحة التحكم</a>
-            <a onclick="logout()" id="logoutLink" style="display:none; color: var(--danger-red);" data-i18n="nav_logout">تسجيل خروج</a>
+            <a onclick="navigate('home'); toggleMenu();" data-i18n="nav_home"><i class="fas fa-shield-alt" style="width:25px; color:var(--primary-blue);"></i> تأكيد الدفع</a>
+            <a onclick="navigate('about'); toggleMenu();" data-i18n="nav_about"><i class="fas fa-info-circle" style="width:25px; color:#555;"></i> من نحن</a>
+            <a onclick="navigate('privacy'); toggleMenu();" data-i18n="nav_privacy"><i class="fas fa-user-shield" style="width:25px; color:#555;"></i> سياسة الخصوصية</a>
+            <a onclick="openReportModal(); toggleMenu();" data-i18n="nav_report"><i class="fas fa-exclamation-triangle" style="width:25px; color:var(--warning-orange);"></i> الإبلاغ عن مشكل</a>
+            <a onclick="navigate('commercial'); toggleMenu();" data-i18n="nav_commercial"><i class="fas fa-store" style="width:25px; color:var(--success-green);"></i> حساب تجاري</a>
+            <a onclick="navigate('admin_login'); toggleMenu();" id="adminLink" style="display:none;"><i class="fas fa-tachometer-alt" style="width:25px;"></i> لوحة التحكم</a>
+            <a onclick="logout(); toggleMenu();" id="logoutLink" style="display:none; color: var(--danger-red); border-top: 1px solid #eee; margin-top: 10px;" data-i18n="nav_logout"><i class="fas fa-sign-out-alt" style="width:25px;"></i> تسجيل خروج</a>
         </nav>
     </aside>
 
     <!-- Main Content -->
     <main class="main-content">
+        <!-- Header with Menu Toggle -->
         <header class="header">
-            <h2 id="pageTitle" data-i18n="title_payment">تأكيد الدفع Payment</h2>
+            <div class="header-left">
+                <button class="menu-btn" onclick="toggleMenu()"><i class="fas fa-bars"></i></button>
+                <h2 id="pageTitle" data-i18n="title_payment">تأكيد الدفع Payment</h2>
+            </div>
             <div class="lang-switch">
-                <button onclick="changeLanguage('ar')" id="btn-ar" class="active">العربية</button>
-                <button onclick="changeLanguage('fr')" id="btn-fr">Français</button>
+                <button onclick="changeLanguage('ar')" id="btn-ar" class="active">AR</button>
+                <button onclick="changeLanguage('fr')" id="btn-fr">FR</button>
             </div>
         </header>
 
@@ -152,51 +205,64 @@
         <section id="view-home" class="view-section active">
             <img src="https://play-lh.googleusercontent.com/4yxUE_wg_ljg1BRyO7BQ8l3siAyQZSeGx17OKyo0Y2Htt9A5oJEC7-zW0p4opjIbWQ=w600-h300-pc0xffffff-pd" alt="Algérie Poste" class="alg-poste-img">
             
+            <!-- Professional Cheque Card -->
             <div class="cheque-card">
+                <div class="cheque-header-text">Information de Paiement / معلومات الدفع</div>
                 <div class="cheque-info">
-                    <p data-i18n="chq_name">الاسم الكامل: <span id="pub-name">---</span></p>
-                    <p data-i18n="chq_rip">رقم الحساب (RIP): <span id="pub-rip">---</span></p>
-                    <p data-i18n="chq_address">العنوان: <span id="pub-address">---</span></p>
+                    <p><span data-i18n="chq_name">الاسم الكامل:</span> <span id="pub-name" class="cheque-value">---</span></p>
+                    <p>
+                        <span data-i18n="chq_rip">رقم الحساب (RIP):</span> 
+                        <span id="pub-rip" class="cheque-value" style="font-family: monospace; letter-spacing: 2px;">---</span>
+                        <button class="copy-btn" onclick="copyRIP()" title="نسخ الرقم"><i class="fas fa-copy"></i> <span data-i18n="btn_copy">نسخ</span></button>
+                    </p>
+                    <p><span data-i18n="chq_address">العنوان:</span> <span id="pub-address" class="cheque-value" style="font-size:14px;">---</span></p>
                 </div>
             </div>
 
-            <div style="background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.1);">
+            <!-- Form -->
+            <div class="form-container">
                 <form id="paymentForm">
                     <div class="form-group">
                         <label data-i18n="frm_name">الاسم الكامل</label>
-                        <input type="text" id="pay_name" class="form-control" required>
+                        <input type="text" id="pay_name" class="form-control" placeholder="الاسم واللقب..." required>
+                    </div>
+                    <div class="dual-input">
+                        <div class="form-group">
+                            <label data-i18n="frm_phone">رقم الهاتف</label>
+                            <input type="tel" id="pay_phone" class="form-control" placeholder="05/06/07..." required>
+                        </div>
+                        <div class="form-group">
+                            <label data-i18n="frm_wilaya">الولاية</label>
+                            <input type="text" id="pay_wilaya" class="form-control" placeholder="مثال: الجزائر العاصمة" required>
+                        </div>
+                    </div>
+                    <div class="dual-input">
+                        <div class="form-group">
+                            <label data-i18n="frm_rip">رقم الحساب البريدي المرسل منه</label>
+                            <input type="text" id="pay_rip" class="form-control" placeholder="RIP الخاص بك" required>
+                        </div>
+                        <div class="form-group">
+                            <label data-i18n="frm_course">اسم الدورة / الخدمة</label>
+                            <input type="text" id="pay_course" class="form-control" placeholder="ما الذي دفعت ثمنه؟" required>
+                        </div>
                     </div>
                     <div class="form-group">
-                        <label data-i18n="frm_phone">رقم الهاتف</label>
-                        <input type="tel" id="pay_phone" class="form-control" required>
-                    </div>
-                    <div class="form-group">
-                        <label data-i18n="frm_wilaya">الولاية</label>
-                        <input type="text" id="pay_wilaya" class="form-control" required>
-                    </div>
-                    <div class="form-group">
-                        <label data-i18n="frm_rip">رقم الحساب البريدي المرسل منه</label>
-                        <input type="text" id="pay_rip" class="form-control" required>
-                    </div>
-                    <div class="form-group">
-                        <label data-i18n="frm_course">اسم الدورة</label>
-                        <input type="text" id="pay_course" class="form-control" required>
-                    </div>
-                    <div class="form-group">
-                        <label data-i18n="frm_receipt">رفع إثبات الدفع (Reçu)</label>
-                        <input type="file" id="pay_file" class="form-control" accept="image/*,.pdf" required>
+                        <label data-i18n="frm_receipt"><i class="fas fa-cloud-upload-alt"></i> رفع إثبات الدفع (Reçu)</label>
+                        <input type="file" id="pay_file" class="form-control" accept="image/*,.pdf" style="padding: 9px;" required>
                     </div>
                     <button type="submit" class="btn-submit" id="btn_submit_pay">
-                        <i class="fas fa-paper-plane"></i> <span data-i18n="btn_confirm">تأكيد الدفع</span>
+                        <i class="fas fa-check-circle"></i> <span data-i18n="btn_confirm">تأكيد الدفع</span>
                     </button>
                 </form>
-                <p class="disclaimer" data-i18n="txt_disclaimer">سيتم التأكد من طلبكم في ظرف 24 سا إلى 48 سا، سنتصل بكم فور التأكد من أن دفعكم صحيح.</p>
+                <div class="disclaimer">
+                    <i class="fas fa-shield-alt"></i> <span data-i18n="txt_disclaimer">سيتم التأكد من طلبكم في ظرف 24 سا إلى 48 سا، سنتصل بكم فور التأكد من أن دفعكم صحيح.</span>
+                </div>
             </div>
         </section>
 
         <!-- VIEW: About & Privacy -->
         <section id="view-text" class="view-section">
-            <div style="background: #fff; padding: 30px; border-radius: 8px; box-shadow: var(--box-shadow);" id="textContent">
+            <div class="form-container" id="textContent" style="font-size: 16px; line-height: 2;">
                 <!-- Content injected here -->
             </div>
         </section>
@@ -204,45 +270,50 @@
         <!-- VIEW: Commercial Account Auth -->
         <section id="view-commercial" class="view-section">
             <div class="login-container">
-                <h3 style="text-align:center; margin-bottom:20px; color:var(--primary-blue);" data-i18n="nav_commercial">حساب تجاري</h3>
-                <div class="admin-tabs" style="justify-content: center;">
+                <div style="text-align:center; margin-bottom:20px;">
+                    <i class="fas fa-store" style="font-size:40px; color:var(--primary-blue); margin-bottom:10px;"></i>
+                    <h3 style="color:var(--primary-blue);" data-i18n="nav_commercial">حساب تجاري</h3>
+                </div>
+                <div class="admin-tabs" style="justify-content: center; margin-bottom:25px;">
                     <button class="active" onclick="toggleCommAuth('login')" data-i18n="btn_login">تسجيل الدخول</button>
                     <button onclick="toggleCommAuth('register')" data-i18n="btn_register">إنشاء حساب</button>
                 </div>
                 
                 <form id="commLoginForm" class="admin-tab-content active">
-                    <div class="form-group">
-                        <label>Email</label>
-                        <input type="email" id="cl_email" class="form-control" required>
-                    </div>
-                    <div class="form-group">
-                        <label>Password</label>
-                        <input type="password" id="cl_pass" class="form-control" required>
-                    </div>
-                    <button type="submit" class="btn-submit" data-i18n="btn_login">دخول</button>
+                    <div class="form-group"><label>Email</label><input type="email" id="cl_email" class="form-control" required></div>
+                    <div class="form-group"><label>Password</label><input type="password" id="cl_pass" class="form-control" required></div>
+                    <button type="submit" class="btn-submit"><i class="fas fa-sign-in-alt"></i> <span data-i18n="btn_login">دخول</span></button>
                 </form>
 
                 <form id="commRegForm" class="admin-tab-content">
-                    <div class="form-group"><label data-i18n="frm_name">الاسم</label><input type="text" id="cr_name" class="form-control" required></div>
-                    <div class="form-group"><label data-i18n="frm_phone">الهاتف</label><input type="text" id="cr_phone" class="form-control" required></div>
+                    <div class="form-group"><label data-i18n="frm_name">الاسم الكامل</label><input type="text" id="cr_name" class="form-control" required></div>
+                    <div class="form-group"><label data-i18n="frm_phone">رقم الهاتف</label><input type="text" id="cr_phone" class="form-control" required></div>
                     <div class="form-group"><label>Email</label><input type="email" id="cr_email" class="form-control" required></div>
-                    <div class="form-group"><label data-i18n="frm_company">اسم الشركة</label><input type="text" id="cr_company" class="form-control" required></div>
+                    <div class="form-group"><label data-i18n="frm_company">اسم الشركة / المؤسسة</label><input type="text" id="cr_company" class="form-control" required></div>
                     <div class="form-group"><label>Password</label><input type="password" id="cr_pass" class="form-control" required></div>
-                    <button type="submit" class="btn-submit" data-i18n="btn_register">إنشاء</button>
+                    <button type="submit" class="btn-submit"><i class="fas fa-user-plus"></i> <span data-i18n="btn_register">إنشاء</span></button>
                 </form>
             </div>
         </section>
 
         <!-- VIEW: Admin Login -->
         <section id="view-admin_login" class="view-section">
-            <div class="login-container">
-                <h3 style="text-align:center; margin-bottom:20px; color:var(--danger-red);">Admin Secure Access</h3>
+            <div class="login-container" style="border-top-color: var(--danger-red);">
+                <div style="text-align:center; margin-bottom:25px;">
+                    <i class="fas fa-user-shield" style="font-size:45px; color:var(--danger-red); margin-bottom:10px;"></i>
+                    <h3 style="color:var(--danger-red);">Admin Secure Access</h3>
+                </div>
                 <form id="adminLoginForm">
                     <div class="form-group">
-                        <label>Password / Token</label>
-                        <input type="password" id="admin_pass" class="form-control" required autocomplete="off">
+                        <label>Username</label>
+                        <!-- Added Username Field -->
+                        <input type="text" id="admin_user" class="form-control" required autocomplete="off" placeholder="Enter Admin Username">
                     </div>
-                    <button type="submit" class="btn-submit bg-red">Access</button>
+                    <div class="form-group">
+                        <label>Password Token</label>
+                        <input type="password" id="admin_pass" class="form-control" required autocomplete="off" placeholder="Enter Secure Token">
+                    </div>
+                    <button type="submit" class="btn-submit bg-red" style="background: var(--danger-red);"><i class="fas fa-lock-open"></i> Access Dashboard</button>
                 </form>
             </div>
         </section>
@@ -257,16 +328,17 @@
                 <div class="card c-purple admin-only"> <h3 id="st_comm">0</h3> <p data-i18n="st_comm">حساب تجاري</p> </div>
             </div>
 
-            <div id="companyUrlContainer" style="display:none; background:#e9ecef; padding:10px; border-radius:5px; margin-bottom:15px; text-align:center; font-weight:bold;">
-                رابط شركتك: <a href="#" id="companyLink" target="_blank"></a>
+            <div id="companyUrlContainer" style="display:none; background:#e9ecef; padding:15px; border-radius:8px; margin-bottom:20px; text-align:center; font-weight:bold; border: 1px dashed var(--primary-blue);">
+                <i class="fas fa-link" style="color:var(--primary-blue);"></i> رابط الدفع الخاص بشركتك لمشاركته مع العملاء:<br> 
+                <a href="#" id="companyLink" target="_blank" style="color:var(--primary-blue); font-size:18px; display:inline-block; margin-top:5px;"></a>
             </div>
 
             <div class="admin-tabs">
-                <button class="tab-btn active" onclick="switchDashTab('payments')" data-i18n="tab_pay">قسم الدفعات</button>
-                <button class="tab-btn" onclick="switchDashTab('failed')" data-i18n="tab_fail">الدفع الفاشل</button>
-                <button class="tab-btn" onclick="switchDashTab('reports')" data-i18n="tab_rep">الابلاغات</button>
-                <button class="tab-btn admin-only" onclick="switchDashTab('accounts')" data-i18n="tab_acc">الحسابات</button>
-                <button class="tab-btn" onclick="switchDashTab('settings')" data-i18n="tab_set">قسم المعلومات</button>
+                <button class="tab-btn active" onclick="switchDashTab('payments')" data-i18n="tab_pay"><i class="fas fa-money-check-alt"></i> قسم الدفعات</button>
+                <button class="tab-btn" onclick="switchDashTab('failed')" data-i18n="tab_fail"><i class="fas fa-times-circle"></i> الدفع الفاشل</button>
+                <button class="tab-btn" onclick="switchDashTab('reports')" data-i18n="tab_rep"><i class="fas fa-envelope-open-text"></i> الابلاغات</button>
+                <button class="tab-btn admin-only" onclick="switchDashTab('accounts')" data-i18n="tab_acc"><i class="fas fa-users"></i> الحسابات</button>
+                <button class="tab-btn" onclick="switchDashTab('settings')" data-i18n="tab_set"><i class="fas fa-cogs"></i> قسم المعلومات</button>
             </div>
 
             <!-- Payments Tab -->
@@ -287,7 +359,7 @@
             <div id="tab-failed" class="admin-tab-content">
                 <div class="table-responsive">
                     <table>
-                        <thead><tr><th>الوقت والتاريخ</th> <th>الاسم</th> <th>الدورة</th> <th>Reçu</th> <th>السبب/الحالة</th></tr></thead>
+                        <thead><tr><th>الوقت والتاريخ</th> <th>الاسم</th> <th>الدورة</th> <th>Reçu</th> <th>الحالة</th></tr></thead>
                         <tbody id="tbl_failed"></tbody>
                     </table>
                 </div>
@@ -303,19 +375,19 @@
                 </div>
             </div>
 
-            <!-- Accounts Tab -->
+            <!-- Accounts Tab (Admin Only) -->
             <div id="tab-accounts" class="admin-tab-content admin-only">
-                <h4 style="margin-bottom:10px;">طلبات جديدة</h4>
-                <div class="table-responsive" style="margin-bottom:20px;">
+                <h4 style="margin-bottom:15px; color:var(--primary-blue);"><i class="fas fa-user-clock"></i> طلبات جديدة قيد الانتظار</h4>
+                <div class="table-responsive" style="margin-bottom:25px;">
                     <table>
                         <thead><tr><th>الشركة</th><th>الاسم</th><th>الهاتف</th><th>إجراء</th></tr></thead>
                         <tbody id="tbl_acc_req"></tbody>
                     </table>
                 </div>
-                <h4 style="margin-bottom:10px;">حسابات نشطة</h4>
+                <h4 style="margin-bottom:15px; color:var(--success-green);"><i class="fas fa-user-check"></i> حسابات تجارية نشطة</h4>
                 <div class="table-responsive">
                     <table>
-                        <thead><tr><th>تاريخ الانضمام</th><th>الشركة</th><th>الرابط</th></tr></thead>
+                        <thead><tr><th>تاريخ الانضمام</th><th>الشركة</th><th>الرابط المخصص</th></tr></thead>
                         <tbody id="tbl_acc_active"></tbody>
                     </table>
                 </div>
@@ -323,31 +395,32 @@
 
             <!-- Settings Tab -->
             <div id="tab-settings" class="admin-tab-content">
-                <div style="background:#fff; padding:20px; border-radius:8px;">
+                <div class="form-container">
                     <form id="settingsForm">
-                        <h4 style="margin-bottom:15px;">معلومات الدفع (تظهر للعملاء)</h4>
+                        <h4 style="margin-bottom:20px; color:var(--primary-blue); border-bottom:2px solid #eee; padding-bottom:10px;"><i class="fas fa-money-check"></i> معلومات الدفع (الشيك الذي يظهر للعملاء)</h4>
                         <div class="dual-input">
-                            <div class="form-group"><label class="ar-label">الاسم</label><input type="text" id="set_name_ar" class="form-control"></div>
-                            <div class="form-group"><label class="fr-label">Nom</label><input type="text" id="set_name_fr" class="form-control"></div>
+                            <div class="form-group"><label class="ar-label">الاسم الكامل</label><input type="text" id="set_name_ar" class="form-control"></div>
+                            <div class="form-group"><label class="fr-label">Nom Complet</label><input type="text" id="set_name_fr" class="form-control"></div>
                         </div>
-                        <div class="form-group"><label>RIP</label><input type="text" id="set_rip" class="form-control"></div>
+                        <div class="form-group"><label>رقم الحساب البريدي (RIP)</label><input type="text" id="set_rip" class="form-control" style="font-family: monospace; font-size:16px;"></div>
                         <div class="dual-input">
                             <div class="form-group"><label class="ar-label">العنوان</label><input type="text" id="set_address_ar" class="form-control"></div>
                             <div class="form-group"><label class="fr-label">Adresse</label><input type="text" id="set_address_fr" class="form-control"></div>
                         </div>
-                        <hr style="margin:20px 0;">
-                        <h4 style="margin-bottom:15px;" class="admin-only">صفحات النظام</h4>
+                        
                         <div class="admin-only">
+                            <h4 style="margin:30px 0 20px 0; color:var(--primary-blue); border-bottom:2px solid #eee; padding-bottom:10px;"><i class="fas fa-file-alt"></i> محتوى صفحات النظام</h4>
                             <div class="dual-input">
-                                <div class="form-group"><label class="ar-label">من نحن</label><textarea id="set_about_ar" class="form-control" rows="3"></textarea></div>
-                                <div class="form-group"><label class="fr-label">À propos</label><textarea id="set_about_fr" class="form-control" rows="3"></textarea></div>
+                                <div class="form-group"><label class="ar-label">من نحن</label><textarea id="set_about_ar" class="form-control" rows="4"></textarea></div>
+                                <div class="form-group"><label class="fr-label">À propos</label><textarea id="set_about_fr" class="form-control" rows="4"></textarea></div>
                             </div>
                             <div class="dual-input">
-                                <div class="form-group"><label class="ar-label">سياسة الخصوصية</label><textarea id="set_priv_ar" class="form-control" rows="3"></textarea></div>
-                                <div class="form-group"><label class="fr-label">Politique</label><textarea id="set_priv_fr" class="form-control" rows="3"></textarea></div>
+                                <div class="form-group"><label class="ar-label">سياسة الخصوصية</label><textarea id="set_priv_ar" class="form-control" rows="4"></textarea></div>
+                                <div class="form-group"><label class="fr-label">Politique de confidentialité</label><textarea id="set_priv_fr" class="form-control" rows="4"></textarea></div>
                             </div>
                         </div>
-                        <button type="submit" class="btn-submit" style="width:auto;">حفظ التغييرات</button>
+                        
+                        <button type="submit" class="btn-submit" style="width:auto; margin-top:15px;"><i class="fas fa-save"></i> حفظ التغييرات</button>
                     </form>
                 </div>
             </div>
@@ -357,12 +430,12 @@
     </main>
 </div>
 
-<!-- Report Modal (Hidden by default, triggered by JS SweetAlert) -->
+<!-- Report Modal Template (Hidden by default, triggered by SweetAlert) -->
 <template id="reportTemplate">
     <input type="text" id="rep_name" class="swal2-input" placeholder="الاسم / Nom">
     <input type="email" id="rep_email" class="swal2-input" placeholder="الإيمايل / Email">
     <input type="tel" id="rep_phone" class="swal2-input" placeholder="رقم الهاتف / Téléphone">
-    <textarea id="rep_desc" class="swal2-textarea" placeholder="وصف المشكل / Description"></textarea>
+    <textarea id="rep_desc" class="swal2-textarea" placeholder="وصف المشكل بدقة / Description détaillée"></textarea>
 </template>
 
 <!-- Firebase SDKs -->
@@ -395,7 +468,6 @@
     // --- SECURE ENCAPSULATION & LOGIC ---
     (function() {
         // --- 1. Security & Hashing ---
-        // Basic SHA-256 hash function to avoid storing plain text password in code
         async function hashData(message) {
             const msgUint8 = new TextEncoder().encode(message);
             const hashBuffer = await crypto.subtle.digest('SHA-256', msgUint8);
@@ -408,9 +480,31 @@
         // --- 2. State Management ---
         const state = {
             lang: 'ar',
-            role: 'guest', // guest, admin, commercial
+            role: 'guest', 
             companyId: null,
-            targetCompany: 'default' // Used when customer visits url/#/company_name
+            targetCompany: 'default' 
+        };
+
+        // --- UI Logic: Sidebar ---
+        window.toggleMenu = () => {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('sidebarOverlay');
+            sidebar.classList.toggle('open');
+            overlay.classList.toggle('active');
+        };
+
+        // --- Copy to Clipboard functionality ---
+        window.copyRIP = () => {
+            const ripText = document.getElementById('pub-rip').innerText;
+            if(ripText === '---' || ripText === '') return;
+            
+            navigator.clipboard.writeText(ripText).then(() => {
+                const msg = state.lang === 'ar' ? 'تم نسخ رقم الحساب بنجاح!' : 'RIP copié avec succès!';
+                Swal.fire({
+                    icon: 'success', title: msg, toast: true, position: 'top-end',
+                    showConfirmButton: false, timer: 2000, timerProgressBar: true
+                });
+            });
         };
 
         // --- 3. I18N Translations ---
@@ -418,8 +512,8 @@
             ar: {
                 nav_home: "تأكيد الدفع", nav_about: "من نحن", nav_privacy: "سياسة الخصوصية", nav_report: "الإبلاغ عن مشكل", nav_commercial: "حساب تجاري", nav_logout: "تسجيل خروج",
                 title_payment: "تأكيد الدفع Payment",
-                chq_name: "الاسم الكامل: ", chq_rip: "رقم الحساب (RIP): ", chq_address: "العنوان: ",
-                frm_name: "الاسم الكامل", frm_phone: "رقم الهاتف", frm_wilaya: "الولاية", frm_rip: "رقم الحساب البريدي المرسل منه", frm_course: "اسم الدورة", frm_receipt: "رفع إثبات الدفع (Reçu)", frm_company: "اسم الشركة",
+                chq_name: "الاسم الكامل:", chq_rip: "رقم الحساب (RIP):", chq_address: "العنوان:", btn_copy: "نسخ",
+                frm_name: "الاسم الكامل", frm_phone: "رقم الهاتف", frm_wilaya: "الولاية", frm_rip: "رقم الحساب البريدي المرسل منه", frm_course: "اسم الدورة / الخدمة", frm_receipt: "رفع إثبات الدفع (Reçu)", frm_company: "اسم الشركة / المؤسسة",
                 btn_confirm: "تأكيد الدفع", btn_login: "تسجيل الدخول", btn_register: "إنشاء حساب",
                 txt_disclaimer: "سيتم التأكد من طلبكم في ظرف 24 سا إلى 48 سا، سنتصل بكم فور التأكد من أن دفعكم صحيح.",
                 msg_success: "تم إرسال إثبات الدفع بنجاح!", msg_report: "تم إرسال طلبك بنجاح", msg_reg_wait: "تم التسجيل بنجاح، انتظر موافقة فريق Prouver على طلبك، سنتصل بك قريباً.",
@@ -429,8 +523,8 @@
             fr: {
                 nav_home: "Confirmer Paiement", nav_about: "À propos", nav_privacy: "Politique de conf.", nav_report: "Signaler un prob.", nav_commercial: "Compte Commercial", nav_logout: "Déconnexion",
                 title_payment: "Confirmation de Paiement",
-                chq_name: "Nom Complet: ", chq_rip: "Numéro de Compte (RIP): ", chq_address: "Adresse: ",
-                frm_name: "Nom Complet", frm_phone: "Téléphone", frm_wilaya: "Wilaya", frm_rip: "RIP de l'expéditeur", frm_course: "Nom de la formation", frm_receipt: "Télécharger le reçu", frm_company: "Nom de l'entreprise",
+                chq_name: "Nom Complet:", chq_rip: "Numéro de Compte (RIP):", chq_address: "Adresse:", btn_copy: "Copier",
+                frm_name: "Nom Complet", frm_phone: "Téléphone", frm_wilaya: "Wilaya", frm_rip: "RIP de l'expéditeur", frm_course: "Nom de la formation/service", frm_receipt: "Télécharger le reçu", frm_company: "Nom de l'entreprise",
                 btn_confirm: "Confirmer Paiement", btn_login: "Se Connecter", btn_register: "S'inscrire",
                 txt_disclaimer: "Votre demande sera vérifiée dans 24h à 48h. Nous vous contacterons dès confirmation.",
                 msg_success: "Preuve de paiement envoyée avec succès!", msg_report: "Votre demande a été envoyée.", msg_reg_wait: "Inscription réussie, attendez l'approbation de l'équipe Prouver. Nous vous contacterons bientôt.",
@@ -439,7 +533,6 @@
             }
         };
 
-        // Initialize default settings in LocalStorage if not exists
         const defaultSettings = {
             default: {
                 ar: { name: "مؤسسة بروفر", address: "الجزائر العاصمة", about: "نحن مؤسسة...", priv: "سياسة الخصوصية..." },
@@ -450,12 +543,10 @@
         if(!localStorage.getItem('prouver_settings')) localStorage.setItem('prouver_settings', JSON.stringify(defaultSettings));
         if(!localStorage.getItem('prouver_db')) localStorage.setItem('prouver_db', JSON.stringify({ payments:[], reports:[], accounts:[] }));
 
-        // --- 4. Core Functions ---
-
-        // Universal Data Saver (Tries Firebase, falls back to LS)
+        // Universal Data Saver
         async function saveData(collectionName, data) {
             data.timestamp = Date.now();
-            data.companyId = state.targetCompany; // link to specific company
+            data.companyId = state.targetCompany; 
             
             if (isFirebaseReady) {
                 try {
@@ -463,7 +554,6 @@
                     return true;
                 } catch(e) { console.error("FB Save Error", e); }
             }
-            // Fallback
             let ldb = JSON.parse(localStorage.getItem('prouver_db'));
             data.id = 'id_' + Date.now();
             ldb[collectionName].push(data);
@@ -471,17 +561,18 @@
             return true;
         }
 
-        // --- UI Updates ---
+        // UI Updates
         window.changeLanguage = (lang) => {
             state.lang = lang;
             document.documentElement.lang = lang;
+            // Keeping RTL base for sidebar structural reasons, but adjusting text align
             document.documentElement.dir = lang === 'ar' ? 'rtl' : 'ltr';
             document.getElementById('btn-ar').className = lang === 'ar' ? 'active' : '';
             document.getElementById('btn-fr').className = lang === 'fr' ? 'active' : '';
             
             document.querySelectorAll('[data-i18n]').forEach(el => {
                 const key = el.getAttribute('data-i18n');
-                if(i18n[lang][key]) el.innerText = i18n[lang][key];
+                if(i18n[lang][key]) el.innerHTML = el.innerHTML.replace(el.innerText.trim(), i18n[lang][key]); // Keep icons if any
             });
 
             loadPublicSettings();
@@ -493,7 +584,7 @@
 
             if(viewId === 'about' || viewId === 'privacy') {
                 const sets = JSON.parse(localStorage.getItem('prouver_settings'))[state.targetCompany] || JSON.parse(localStorage.getItem('prouver_settings'))['default'];
-                document.getElementById('textContent').innerHTML = `<h3>${i18n[state.lang]['nav_'+viewId]}</h3><p style="margin-top:15px; line-height:1.8;">${sets[state.lang][viewId === 'about'? 'about' : 'priv']}</p>`;
+                document.getElementById('textContent').innerHTML = `<h3 style="color:var(--primary-blue); border-bottom:2px solid #eee; padding-bottom:10px; margin-bottom:15px;"><i class="fas fa-file-alt"></i> ${i18n[state.lang]['nav_'+viewId]}</h3><p style="white-space: pre-wrap;">${sets[state.lang][viewId === 'about'? 'about' : 'priv']}</p>`;
             }
         };
 
@@ -501,11 +592,11 @@
             const sets = JSON.parse(localStorage.getItem('prouver_settings'));
             const data = sets[state.targetCompany] || sets['default'];
             document.getElementById('pub-name').innerText = data[state.lang].name;
-            document.getElementById('pub-rip').innerText = data.rip;
+            document.getElementById('pub-rip').innerText = data.rip || "---";
             document.getElementById('pub-address').innerText = data[state.lang].address;
         }
 
-        // --- Routing Logic ---
+        // Routing Logic
         window.addEventListener('hashchange', handleRoute);
         window.addEventListener('load', () => {
             handleRoute();
@@ -518,7 +609,6 @@
                 state.targetCompany = 'default';
                 navigate('admin_login');
             } else if (hash.startsWith('#/')) {
-                // Commercial Custom URL
                 state.targetCompany = decodeURIComponent(hash.replace('#/', ''));
                 navigate('home');
                 loadPublicSettings();
@@ -528,11 +618,12 @@
             }
         }
 
-        // --- Public Forms ---
+        // Public Forms
         document.getElementById('paymentForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             const btn = document.getElementById('btn_submit_pay');
-            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> جاري الإرسال...';
             btn.disabled = true;
 
             const data = {
@@ -541,7 +632,7 @@
                 wilaya: document.getElementById('pay_wilaya').value,
                 rip: document.getElementById('pay_rip').value,
                 course: document.getElementById('pay_course').value,
-                status: 'pending', // pending, paid, failed
+                status: 'pending',
                 fileName: document.getElementById('pay_file').files[0]?.name || 'No file'
             };
 
@@ -549,19 +640,19 @@
             
             Swal.fire({
                 icon: 'success', title: i18n[state.lang].msg_success,
-                showConfirmButton: false, timer: 2000, backdrop: `rgba(0,86,179,0.4)`
+                showConfirmButton: false, timer: 2500, backdrop: `rgba(0,86,179,0.4)`
             });
             
             e.target.reset();
-            btn.innerHTML = `<i class="fas fa-paper-plane"></i> <span data-i18n="btn_confirm">${i18n[state.lang].btn_confirm}</span>`;
+            btn.innerHTML = originalText;
             btn.disabled = false;
         });
 
         window.openReportModal = () => {
             Swal.fire({
-                title: i18n[state.lang].nav_report,
+                title: `<i class="fas fa-exclamation-triangle" style="color:var(--warning-orange)"></i> ` + i18n[state.lang].nav_report,
                 html: document.getElementById('reportTemplate').innerHTML,
-                confirmButtonText: 'إرسال / Envoyer',
+                confirmButtonText: '<i class="fas fa-paper-plane"></i> إرسال / Envoyer',
                 confirmButtonColor: '#0056b3',
                 preConfirm: () => {
                     return {
@@ -579,7 +670,7 @@
             });
         };
 
-        // --- Commercial Auth ---
+        // Commercial Auth
         window.toggleCommAuth = (type) => {
             document.getElementById('commLoginForm').classList.toggle('active', type==='login');
             document.getElementById('commRegForm').classList.toggle('active', type==='register');
@@ -596,10 +687,9 @@
                 email: document.getElementById('cr_email').value,
                 company: comp,
                 pass: document.getElementById('cr_pass').value,
-                status: 'pending' // requires admin approval
+                status: 'pending'
             });
             
-            // Initialize empty settings for this company
             let sets = JSON.parse(localStorage.getItem('prouver_settings'));
             sets[comp] = {
                 ar: { name: comp, address: "", about: "", priv: "" },
@@ -608,7 +698,7 @@
             };
             localStorage.setItem('prouver_settings', JSON.stringify(sets));
 
-            Swal.fire({ icon:'info', title: i18n[state.lang].msg_reg_wait });
+            Swal.fire({ icon:'info', title: i18n[state.lang].msg_reg_wait, confirmButtonColor: '#0056b3' });
             e.target.reset();
         });
 
@@ -623,23 +713,25 @@
                 if(acc.status === 'active') {
                     login(acc.company, 'commercial');
                 } else {
-                    Swal.fire('حساب قيد المراجعة', 'يرجى الانتظار لحين الموافقة', 'warning');
+                    Swal.fire('حساب قيد المراجعة', 'يرجى الانتظار لحين موافقة الإدارة على حسابك', 'warning');
                 }
             } else {
-                Swal.fire('خطأ', 'بيانات غير صحيحة', 'error');
+                Swal.fire('خطأ', 'بيانات الدخول غير صحيحة', 'error');
             }
         });
 
-        // --- Admin/Dashboard Logic ---
+        // Admin/Dashboard Logic
         document.getElementById('adminLoginForm').addEventListener('submit', async (e) => {
             e.preventDefault();
+            const user = document.getElementById('admin_user').value.trim();
             const pass = document.getElementById('admin_pass').value;
             const hash = await hashData(pass);
             
-            if (hash === ADMIN_HASH) {
+            if (user === 'admin' && hash === ADMIN_HASH) {
                 login('default', 'admin');
+                document.getElementById('adminLoginForm').reset();
             } else {
-                Swal.fire('Access Denied', 'Invalid token', 'error');
+                Swal.fire('Access Denied', 'Invalid Username or Token', 'error');
             }
         });
 
@@ -682,11 +774,9 @@
             let dbData = JSON.parse(localStorage.getItem('prouver_db'));
             let sets = JSON.parse(localStorage.getItem('prouver_settings'))[state.companyId] || JSON.parse(localStorage.getItem('prouver_settings'))['default'];
             
-            // Filter by role
             let myPayments = state.role === 'admin' ? dbData.payments : dbData.payments.filter(p => p.companyId === state.companyId);
             let myReports = state.role === 'admin' ? dbData.reports : dbData.reports.filter(r => r.companyId === state.companyId);
 
-            // Time logic & Auto-Fail
             const now = Date.now();
             myPayments.forEach(p => {
                 if(p.status === 'pending') {
@@ -694,17 +784,14 @@
                     if(hrs >= 48) p.status = 'failed';
                 }
             });
-            // Resave if altered
             localStorage.setItem('prouver_db', JSON.stringify(dbData));
 
-            // Stats
             document.getElementById('st_all').innerText = myPayments.length;
             document.getElementById('st_new').innerText = myPayments.filter(p=>p.status==='pending').length;
             document.getElementById('st_fail').innerText = myPayments.filter(p=>p.status==='failed').length;
             document.getElementById('st_rep').innerText = myReports.length;
             if(state.role === 'admin') document.getElementById('st_comm').innerText = dbData.accounts.length;
 
-            // Payments Table
             const tbodyP = document.getElementById('tbl_payments');
             tbodyP.innerHTML = '';
             myPayments.filter(p=>p.status !== 'failed').forEach(p => {
@@ -713,36 +800,33 @@
                 if(p.status === 'paid') { timeColor = 'bg-gray'; timeTxt = '-'; }
                 else if(hrs >= 24) timeColor = 'bg-orange';
 
-                let actionHtml = p.status === 'paid' ? '<span class="status-badge bg-blue">مدفوع</span>' : 
+                let actionHtml = p.status === 'paid' ? '<span class="status-badge bg-blue"><i class="fas fa-check"></i> مدفوع</span>' : 
                     `<button class="btn-action bg-blue" onclick="changePayStatus('${p.id}', 'paid')">قبول</button>
                      <button class="btn-action bg-red" onclick="changePayStatus('${p.id}', 'failed')">رفض</button>`;
 
                 tbodyP.innerHTML += `<tr>
-                    <td>${new Date(p.timestamp).toLocaleString()}</td>
-                    <td>${p.name}</td><td>${p.wilaya}</td><td>${p.course || '-'}</td><td>${p.phone}</td>
+                    <td dir="ltr">${new Date(p.timestamp).toLocaleString()}</td>
+                    <td>${p.name}</td><td>${p.wilaya}</td><td>${p.course || '-'}</td><td dir="ltr">${p.phone}</td>
                     <td>${p.fileName}</td>
                     <td><span class="status-badge ${timeColor}">${timeTxt}</span></td>
                     <td>${actionHtml}</td>
                 </tr>`;
             });
 
-            // Failed Table
             const tbodyF = document.getElementById('tbl_failed');
             tbodyF.innerHTML = '';
             myPayments.filter(p=>p.status === 'failed').forEach(p => {
                 tbodyF.innerHTML += `<tr>
-                    <td>${new Date(p.timestamp).toLocaleString()}</td>
+                    <td dir="ltr">${new Date(p.timestamp).toLocaleString()}</td>
                     <td>${p.name}</td><td>${p.course || '-'}</td><td>${p.fileName}</td>
-                    <td><span class="status-badge bg-red">فاشل</span></td>
+                    <td><span class="status-badge bg-red"><i class="fas fa-times"></i> فاشل</span></td>
                 </tr>`;
             });
 
-            // Reports Table
             document.getElementById('tbl_reports').innerHTML = myReports.map(r => `<tr>
-                <td>${new Date(r.timestamp).toLocaleString()}</td><td>${r.name}</td><td>${r.phone}</td><td>${r.email}</td><td>${r.desc}</td>
+                <td dir="ltr">${new Date(r.timestamp).toLocaleString()}</td><td>${r.name}</td><td dir="ltr">${r.phone}</td><td>${r.email}</td><td>${r.desc}</td>
             </tr>`).join('');
 
-            // Accounts (Admin)
             if(state.role === 'admin') {
                 const tbodyReq = document.getElementById('tbl_acc_req');
                 const tbodyAct = document.getElementById('tbl_acc_active');
@@ -750,32 +834,30 @@
                 
                 dbData.accounts.forEach(a => {
                     if(a.status === 'pending') {
-                        tbodyReq.innerHTML += `<tr><td>${a.company}</td><td>${a.name}</td><td>${a.phone}</td>
-                            <td><button class="btn-action bg-green" onclick="accAction('${a.id}','active')">موافقة</button></td></tr>`;
+                        tbodyReq.innerHTML += `<tr><td>${a.company}</td><td>${a.name}</td><td dir="ltr">${a.phone}</td>
+                            <td><button class="btn-action bg-green" onclick="accAction('${a.id}','active')"><i class="fas fa-check"></i> موافقة</button></td></tr>`;
                     } else {
                         const lnk = window.location.origin + window.location.pathname + '#/' + encodeURIComponent(a.company);
-                        tbodyAct.innerHTML += `<tr><td>${new Date(a.timestamp).toLocaleString()}</td><td>${a.company}</td>
-                            <td><a href="${lnk}" target="_blank">رابط</a></td></tr>`;
+                        tbodyAct.innerHTML += `<tr><td dir="ltr">${new Date(a.timestamp).toLocaleString()}</td><td>${a.company}</td>
+                            <td dir="ltr"><a href="${lnk}" target="_blank" style="color:var(--primary-blue); text-decoration:none;"><i class="fas fa-external-link-alt"></i> ${lnk}</a></td></tr>`;
                     }
                 });
             }
 
-            // Fill Settings Form
-            document.getElementById('set_name_ar').value = sets.ar.name;
-            document.getElementById('set_name_fr').value = sets.fr.name;
-            document.getElementById('set_rip').value = sets.rip;
-            document.getElementById('set_address_ar').value = sets.ar.address;
-            document.getElementById('set_address_fr').value = sets.fr.address;
+            document.getElementById('set_name_ar').value = sets.ar.name || "";
+            document.getElementById('set_name_fr').value = sets.fr.name || "";
+            document.getElementById('set_rip').value = sets.rip || "";
+            document.getElementById('set_address_ar').value = sets.ar.address || "";
+            document.getElementById('set_address_fr').value = sets.fr.address || "";
             
             if(state.role === 'admin') {
-                document.getElementById('set_about_ar').value = sets.ar.about;
-                document.getElementById('set_about_fr').value = sets.fr.about;
-                document.getElementById('set_priv_ar').value = sets.ar.priv;
-                document.getElementById('set_priv_fr').value = sets.fr.priv;
+                document.getElementById('set_about_ar').value = sets.ar.about || "";
+                document.getElementById('set_about_fr').value = sets.fr.about || "";
+                document.getElementById('set_priv_ar').value = sets.ar.priv || "";
+                document.getElementById('set_priv_fr').value = sets.fr.priv || "";
             }
         }
 
-        // Expose global actions
         window.changePayStatus = (id, newStatus) => {
             let dbData = JSON.parse(localStorage.getItem('prouver_db'));
             let p = dbData.payments.find(x => x.id === id);
@@ -808,8 +890,8 @@
 
             allSets[state.companyId] = cur;
             localStorage.setItem('prouver_settings', JSON.stringify(allSets));
-            Swal.fire('نجاح', 'تم حفظ المعلومات', 'success');
-            loadPublicSettings(); // update in background
+            Swal.fire({icon:'success', title:'تم الحفظ', text:'تم تحديث المعلومات بنجاح', confirmButtonColor:'#0056b3'});
+            loadPublicSettings(); 
         });
 
     })();
