@@ -28,6 +28,25 @@
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Cairo', sans-serif; }
         body { background-color: var(--bg-light); color: var(--text-dark); overflow-x: hidden; }
         
+        /* --- Initial Loader --- */
+        .initial-loader {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: var(--bg-light);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            transition: opacity 0.5s ease;
+        }
+        .initial-loader.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+
         /* Layout */
         .app-container { display: flex; min-height: 100vh; flex-direction: column; }
         
@@ -226,6 +245,17 @@
     </style>
 </head>
 <body>
+
+<!-- Initial Loader Animation -->
+<div id="initialLoader" class="initial-loader">
+    <div class="main-logo-anim">
+        <svg class="draw-check" viewBox="0 0 52 52">
+            <circle class="draw-check-circle" cx="26" cy="26" r="25" fill="none"/>
+            <path class="draw-check-path" fill="none" d="M14.1 27.2l7.1 7.2 16.7-16.8"/>
+        </svg>
+        Prouver
+    </div>
+</div>
 
 <div class="app-container">
     <div id="sidebarOverlay" class="sidebar-overlay" onclick="toggleMenu()"></div>
@@ -740,6 +770,15 @@
             
             handleRoute();        
             setupRealtimeListeners();
+
+            // إخفاء شاشة التحميل بعد 1 ثانية
+            setTimeout(() => {
+                const loader = document.getElementById('initialLoader');
+                if (loader) {
+                    loader.classList.add('hidden');
+                    setTimeout(() => loader.style.display = 'none', 500);
+                }
+            }, 1000);
         });
 
         function setupRealtimeListeners() {
