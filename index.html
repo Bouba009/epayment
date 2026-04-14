@@ -33,13 +33,13 @@
             position: fixed;
             top: 0;
             left: 0;
-            width: 100vw;
-            height: 100vh;
-            background: var(--bg-light);
+            width: 100%;
+            height: 100%;
+            background: #ffffff;
             display: flex;
             justify-content: center;
             align-items: center;
-            z-index: 9999;
+            z-index: 999999;
             transition: opacity 0.5s ease;
         }
         .initial-loader.hidden {
@@ -448,12 +448,16 @@
             <div id="tab-payments" class="admin-tab-content active">
                 <div class="table-toolbar">
                     <input type="text" id="searchPay" class="search-box" data-i18n-placeholder="pl_search_pay" placeholder="ابحث عن اسم، هاتف، دورة..." onkeyup="filterTable('searchPay', 'tbl_payments')">
-                    <button class="btn-export" onclick="exportData('main_tbl_pay', 'المدفوعات')"><i class="fas fa-file-csv"></i> <span data-i18n="btn_csv">تحميل CSV</span></button>
+                    <div style="display: flex; gap: 10px;">
+                        <button class="btn-export bg-red" style="background:var(--danger-red);" onclick="deleteSelected('payments', 'tbl_payments')"><i class="fas fa-trash"></i> <span data-i18n="btn_delete">حذف المحدد</span></button>
+                        <button class="btn-export" onclick="exportData('main_tbl_pay', 'المدفوعات')"><i class="fas fa-file-csv"></i> <span data-i18n="btn_csv">تحميل CSV</span></button>
+                    </div>
                 </div>
                 <div class="table-responsive">
                     <table id="main_tbl_pay">
                         <thead>
                             <tr>
+                                <th style="width: 40px;"><input type="checkbox" onchange="toggleSelectAll('tbl_payments', this)"></th>
                                 <th data-i18n="th_date">الوقت والتاريخ</th> <th data-i18n="th_name">الاسم</th> <th data-i18n="th_wilaya">الولاية</th> <th>RIP</th> <th data-i18n="th_course">الدورة</th> <th data-i18n="th_phone">الهاتف</th> <th>Reçu</th> <th data-i18n="th_duration">المدة</th> <th data-i18n="th_action">الحالة / إجراء</th>
                             </tr>
                         </thead>
@@ -466,11 +470,19 @@
             <div id="tab-failed" class="admin-tab-content">
                 <div class="table-toolbar">
                     <input type="text" id="searchFail" class="search-box" data-i18n-placeholder="pl_search_fail" placeholder="ابحث عن اسم، دورة..." onkeyup="filterTable('searchFail', 'tbl_failed')">
-                    <button class="btn-export" onclick="exportData('main_tbl_fail', 'الدفع_الفاشل')"><i class="fas fa-file-csv"></i> <span data-i18n="btn_csv">تحميل CSV</span></button>
+                    <div style="display: flex; gap: 10px;">
+                        <button class="btn-export bg-red" style="background:var(--danger-red);" onclick="deleteSelected('payments', 'tbl_failed')"><i class="fas fa-trash"></i> <span data-i18n="btn_delete">حذف المحدد</span></button>
+                        <button class="btn-export" onclick="exportData('main_tbl_fail', 'الدفع_الفاشل')"><i class="fas fa-file-csv"></i> <span data-i18n="btn_csv">تحميل CSV</span></button>
+                    </div>
                 </div>
                 <div class="table-responsive">
                     <table id="main_tbl_fail">
-                        <thead><tr><th data-i18n="th_date">الوقت والتاريخ</th> <th data-i18n="th_name">الاسم</th> <th data-i18n="th_course">الدورة</th> <th>Reçu</th> <th data-i18n="th_status">الحالة</th></tr></thead>
+                        <thead>
+                            <tr>
+                                <th style="width: 40px;"><input type="checkbox" onchange="toggleSelectAll('tbl_failed', this)"></th>
+                                <th data-i18n="th_date">الوقت والتاريخ</th> <th data-i18n="th_name">الاسم</th> <th data-i18n="th_course">الدورة</th> <th>Reçu</th> <th data-i18n="th_status">الحالة</th>
+                            </tr>
+                        </thead>
                         <tbody id="tbl_failed"></tbody>
                     </table>
                 </div>
@@ -478,9 +490,18 @@
 
             <!-- Reports Tab -->
             <div id="tab-reports" class="admin-tab-content">
+                <div class="table-toolbar">
+                    <div></div> <!-- Spacer -->
+                    <button class="btn-export bg-red" style="background:var(--danger-red);" onclick="deleteSelected('reports', 'tbl_reports')"><i class="fas fa-trash"></i> <span data-i18n="btn_delete">حذف المحدد</span></button>
+                </div>
                 <div class="table-responsive">
-                    <table>
-                        <thead><tr><th data-i18n="th_date">التاريخ</th> <th data-i18n="th_name">الاسم</th> <th data-i18n="th_phone">الهاتف</th> <th>Email</th> <th data-i18n="th_desc">الوصف</th></tr></thead>
+                    <table id="main_tbl_rep">
+                        <thead>
+                            <tr>
+                                <th style="width: 40px;"><input type="checkbox" onchange="toggleSelectAll('tbl_reports', this)"></th>
+                                <th data-i18n="th_date">التاريخ</th> <th data-i18n="th_name">الاسم</th> <th data-i18n="th_phone">الهاتف</th> <th>Email</th> <th data-i18n="th_desc">الوصف</th>
+                            </tr>
+                        </thead>
                         <tbody id="tbl_reports"></tbody>
                     </table>
                 </div>
@@ -550,7 +571,7 @@
 
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-    import { getFirestore, collection, addDoc, getDocs, updateDoc, doc, setDoc, getDoc, query, where, serverTimestamp, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+    import { getFirestore, collection, addDoc, getDocs, updateDoc, doc, setDoc, getDoc, query, where, serverTimestamp, onSnapshot, deleteDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
     
     const firebaseConfig = {
         apiKey: "AIzaSyBPMJ3vkjIThlGyBTKKZ44BpV0mTaT9U4Q",
@@ -610,7 +631,7 @@
                 title_payment: "تأكيد الدفع Payment",
                 chq_name: "الاسم الكامل:", chq_rip: "رقم الحساب (RIP):", chq_address: "العنوان:", btn_copy: "نسخ",
                 frm_name: "الاسم الكامل", frm_phone: "رقم الهاتف", frm_wilaya: "الولاية", frm_rip: "رقم الحساب البريدي المرسل منه", frm_course: "اسم الدورة / الخدمة", frm_receipt: "رفع إثبات الدفع (Reçu)", frm_company: "اسم الشركة / المؤسسة",
-                btn_confirm: "تأكيد الدفع", btn_login: "تسجيل الدخول", btn_register: "إنشاء حساب", btn_save: "حفظ التغييرات", btn_csv: "تحميل CSV",
+                btn_confirm: "تأكيد الدفع", btn_login: "تسجيل الدخول", btn_register: "إنشاء حساب", btn_save: "حفظ التغييرات", btn_csv: "تحميل CSV", btn_delete: "حذف المحدد",
                 txt_disclaimer: "سيتم التأكد من طلبكم في ظرف 24 سا إلى 48 سا، سنتصل بكم فور التأكد من أن دفعكم صحيح.",
                 msg_success: "تم إرسال إثبات الدفع بنجاح!", msg_report: "تم إرسال طلبك بنجاح", msg_reg_wait: "تم التسجيل بنجاح، انتظر موافقة فريق Prouver على طلبك، سنتصل بك قريباً.",
                 st_new: "دفعات جديدة", st_all: "جميع الدفعات", st_rep: "الإبلاغات", st_fail: "دفع فاشل", st_comm: "حساب تجاري", st_days: "أيام متبقية",
@@ -627,7 +648,7 @@
                 title_payment: "Confirmation de Paiement",
                 chq_name: "Nom Complet:", chq_rip: "Numéro de Compte (RIP):", chq_address: "Adresse:", btn_copy: "Copier",
                 frm_name: "Nom Complet", frm_phone: "Téléphone", frm_wilaya: "Wilaya", frm_rip: "RIP de l'expéditeur", frm_course: "Nom de la formation", frm_receipt: "Télécharger le reçu", frm_company: "Nom de l'entreprise",
-                btn_confirm: "Confirmer Paiement", btn_login: "Se Connecter", btn_register: "S'inscrire", btn_save: "Sauvegarder", btn_csv: "Télécharger CSV",
+                btn_confirm: "Confirmer Paiement", btn_login: "Se Connecter", btn_register: "S'inscrire", btn_save: "Sauvegarder", btn_csv: "Télécharger CSV", btn_delete: "Supprimer",
                 txt_disclaimer: "Votre demande sera vérifiée dans 24h à 48h. Nous vous contacterons dès confirmation.",
                 msg_success: "Preuve envoyée avec succès!", msg_report: "Votre demande a été envoyée.", msg_reg_wait: "Inscription réussie, attendez l'approbation de l'équipe Prouver. Nous vous contacterons bientôt.",
                 st_new: "Nouveaux Paiements", st_all: "Tous Paiements", st_rep: "Signalements", st_fail: "Échoués", st_comm: "Comptes Com.", st_days: "Jours Restants",
@@ -771,7 +792,6 @@
             handleRoute();        
             setupRealtimeListeners();
 
-            // إخفاء شاشة التحميل بعد 1 ثانية
             setTimeout(() => {
                 const loader = document.getElementById('initialLoader');
                 if (loader) {
@@ -1128,17 +1148,72 @@
             });
         };
 
+        window.toggleSelectAll = (tbodyId, sourceCb) => {
+            const checkboxes = document.querySelectorAll(`#${tbodyId} tr:not([style*="display: none"]) .row-cb`);
+            checkboxes.forEach(cb => cb.checked = sourceCb.checked);
+        };
+
+        window.deleteSelected = async (colName, tbodyId) => {
+            const checkedBoxes = document.querySelectorAll(`#${tbodyId} .row-cb:checked`);
+            if(checkedBoxes.length === 0) {
+                Swal.fire(state.lang === 'ar' ? 'تنبيه' : 'Attention', state.lang === 'ar' ? 'يرجى تحديد عنصر واحد على الأقل' : 'Veuillez sélectionner au moins un élément', 'warning');
+                return;
+            }
+            
+            Swal.fire({
+                title: state.lang === 'ar' ? 'تأكيد الحذف' : 'Confirmer la suppression',
+                text: state.lang === 'ar' ? 'هل أنت متأكد من حذف العناصر المحددة؟' : 'Êtes-vous sûr de vouloir supprimer les éléments sélectionnés ?',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#dc3545',
+                cancelButtonColor: '#6c757d',
+                confirmButtonText: state.lang === 'ar' ? 'نعم، احذف' : 'Oui, supprimer',
+                cancelButtonText: state.lang === 'ar' ? 'إلغاء' : 'Annuler'
+            }).then(async (result) => {
+                if(result.isConfirmed) {
+                    let dbData = JSON.parse(localStorage.getItem('prouver_db'));
+                    for(let cb of checkedBoxes) {
+                        const id = cb.value;
+                        if(isFirebaseReady && !id.startsWith('id_')) {
+                            try { await deleteDoc(doc(db, colName, id)); } catch(e) {}
+                        }
+                        dbData[colName] = dbData[colName].filter(x => x.id !== id);
+                    }
+                    localStorage.setItem('prouver_db', JSON.stringify(dbData));
+                    loadDashboardData(true);
+                    
+                    const table = document.getElementById(tbodyId).closest('table');
+                    const selectAllCb = table.querySelector('thead input[type="checkbox"]');
+                    if(selectAllCb) selectAllCb.checked = false;
+                    
+                    Swal.fire(state.lang === 'ar' ? 'تم الحذف بنجاح' : 'Supprimé avec succès', '', 'success');
+                }
+            });
+        };
+
         window.exportData = (tableId, filename) => {
             const table = document.getElementById(tableId);
+            const checkboxes = table.querySelectorAll('tbody .row-cb');
+            const hasChecked = Array.from(checkboxes).some(cb => cb.checked);
+            
             let csv = [];
             for (let i = 0; i < table.rows.length; i++) {
-                if(table.rows[i].style.display === 'none') continue;
-                let row = [], cols = table.rows[i].querySelectorAll("td, th");
-                for (let j = 0; j < cols.length; j++) {
-                    let text = cols[j].innerText.replace(/(\r\n|\n|\r)/gm, " ").trim();
-                    row.push('"' + text.replace(/"/g, '""') + '"');
+                let row = table.rows[i];
+                if(row.style.display === 'none') continue;
+                
+                let isChecked = false;
+                if(i > 0) { 
+                    const cb = row.querySelector('.row-cb');
+                    if(cb) isChecked = cb.checked;
+                    if(hasChecked && !isChecked) continue; 
                 }
-                csv.push(row.join(","));
+
+                let rowData = [], cols = row.querySelectorAll("td, th");
+                for (let j = 1; j < cols.length; j++) {
+                    let text = cols[j].innerText.replace(/(\r\n|\n|\r)/gm, " ").trim();
+                    rowData.push('"' + text.replace(/"/g, '""') + '"');
+                }
+                csv.push(rowData.join(","));
             }
             const blob = new Blob(["\uFEFF"+csv.join("\n")], { type: "text/csv;charset=utf-8;" });
             const link = document.createElement("a");
@@ -1222,6 +1297,7 @@
                      <button class="btn-action bg-red" onclick="changePayStatus('${p.id}', 'failed')">رفض</button>`;
 
                 tbodyP.innerHTML += `<tr data-status="${p.status}">
+                    <td><input type="checkbox" class="row-cb" value="${p.id}"></td>
                     <td dir="ltr">${new Date(p.timestamp).toLocaleString()}</td>
                     <td>${p.name}</td><td>${p.wilaya}</td><td style="font-family:monospace; direction:ltr;">${p.rip}</td><td>${p.course || '-'}</td><td dir="ltr">${p.phone}</td>
                     <td>${p.fileName} <br><button onclick="downloadProof('${p.fileData}', '${p.fileName}')" class="btn-action bg-green" title="تحميل الإثبات"><i class="fas fa-download"></i></button></td>
@@ -1234,6 +1310,7 @@
             tbodyF.innerHTML = '';
             myPayments.filter(p=>p.status === 'failed').forEach(p => {
                 tbodyF.innerHTML += `<tr>
+                    <td><input type="checkbox" class="row-cb" value="${p.id}"></td>
                     <td dir="ltr">${new Date(p.timestamp).toLocaleString()}</td>
                     <td>${p.name}</td><td>${p.course || '-'}</td>
                     <td>${p.fileName} <br><button onclick="downloadProof('${p.fileData}', '${p.fileName}')" class="btn-action bg-green"><i class="fas fa-download"></i></button></td>
@@ -1242,6 +1319,7 @@
             });
 
             document.getElementById('tbl_reports').innerHTML = myReports.map(r => `<tr>
+                <td><input type="checkbox" class="row-cb" value="${r.id}"></td>
                 <td dir="ltr">${new Date(r.timestamp).toLocaleString()}</td><td>${r.name}</td><td dir="ltr">${r.phone}</td><td>${r.email}</td><td>${r.desc}</td>
             </tr>`).join('');
 
