@@ -132,8 +132,8 @@
 
         /* Admin Dashboard & General UI */
         .dash-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 20px; }
-        .card { padding: 20px; border-radius: var(--border-radius); color: #fff; box-shadow: var(--box-shadow); text-align: center; transition: 0.3s;}
-        .card:hover { transform: translateY(-5px); }
+        .card { padding: 20px; border-radius: var(--border-radius); color: #fff; box-shadow: var(--box-shadow); text-align: center; transition: 0.3s; cursor: pointer;}
+        .card:hover { transform: translateY(-5px); filter: brightness(1.1); }
         .card h3 { font-size: 32px; margin-bottom: 5px; font-weight: 800;}
         .c-blue { background: linear-gradient(135deg, #0056b3, #00aaff); }
         .c-green { background: linear-gradient(135deg, #28a745, #5cd675); }
@@ -174,7 +174,21 @@
         .fr-label::after { content: ' (Français)'; color: #888; font-size: 12px; margin-right: 5px; font-weight: normal;}
 
         /* Login Screen */
-        .login-container { max-width: 420px; margin: 40px auto; background: #fff; padding: 35px 30px; border-radius: 12px; box-shadow: var(--box-shadow); border-top: 4px solid var(--primary-blue);}
+        .login-container { max-width: 480px; margin: 40px auto; background: #fff; padding: 35px 30px; border-radius: 12px; box-shadow: var(--box-shadow); border-top: 4px solid var(--primary-blue);}
+
+        /* Added Styles */
+        .pricing-plans { display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap;}
+        .plan-card { flex: 1; min-width: 100px; padding: 15px 10px; border: 2px solid #e9ecef; border-radius: 8px; text-align: center; cursor: pointer; transition: 0.3s; background: #f8f9fa; }
+        .plan-card:hover { border-color: #b3d4fc; }
+        .plan-card.active-plan { border-color: var(--primary-blue); background: rgba(0,86,179,0.05); transform: scale(1.05); box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+        .plan-card h4 { margin-bottom: 5px; color: var(--text-dark); font-size: 14px;}
+        .plan-card p { font-weight: bold; color: var(--primary-blue); font-size: 16px; margin: 0;}
+        
+        .table-toolbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; flex-wrap: wrap; gap: 10px; background: #f8f9fa; padding: 10px; border-radius: 8px; border: 1px solid #eee;}
+        .search-box { padding: 10px 15px; border: 1px solid #ccc; border-radius: 20px; outline: none; width: 100%; max-width: 300px; font-family: 'Cairo'; transition: 0.3s;}
+        .search-box:focus { border-color: var(--primary-blue); box-shadow: 0 0 5px rgba(0,86,179,0.2);}
+        .btn-export { background: #17a2b8; color: #fff; border: none; padding: 8px 15px; border-radius: 20px; cursor: pointer; font-weight: bold; display: flex; align-items: center; gap: 5px; transition: 0.3s;}
+        .btn-export:hover { background: #138496; }
 
         [dir="ltr"] table th, [dir="ltr"] table td { text-align: left; }
         [dir="ltr"] .ar-label::after { margin-left: 5px; margin-right: 0;}
@@ -193,18 +207,16 @@
             .main-logo-anim { font-size: 35px; }
             .main-title-text { font-size: 20px; }
             .draw-check { width: 35px; height: 35px; }
+            .plan-card { min-width: 45%; }
         }
     </style>
 </head>
 <body>
 
 <div class="app-container">
-    <!-- Overlay for closing sidebar -->
     <div id="sidebarOverlay" class="sidebar-overlay" onclick="toggleMenu()"></div>
 
-    <!-- Sidebar (Hidden on Left) -->
     <aside class="sidebar" id="sidebar">
-        <!-- Static Logo in Sidebar -->
         <div class="sidebar-logo">
             <i class="fas fa-check-circle"></i>Prouver
         </div>
@@ -219,9 +231,7 @@
         </nav>
     </aside>
 
-    <!-- Main Content -->
     <main class="main-content">
-        <!-- Header with Menu Toggle -->
         <header class="header">
             <div class="header-left">
                 <button class="menu-btn" onclick="toggleMenu()"><i class="fas fa-bars"></i></button>
@@ -235,7 +245,6 @@
         <!-- VIEW 1: Home (Payment Form) -->
         <section id="view-home" class="view-section active">
             
-            <!-- Animated Logo (Popup) & Drawing SVG Checkmark (Main Page Only) -->
             <div class="main-animated-header">
                 <div class="main-logo-anim">
                     <svg class="draw-check" viewBox="0 0 52 52">
@@ -249,21 +258,19 @@
 
             <img src="https://play-lh.googleusercontent.com/4yxUE_wg_ljg1BRyO7BQ8l3siAyQZSeGx17OKyo0Y2Htt9A5oJEC7-zW0p4opjIbWQ=w600-h300-pc0xffffff-pd" alt="Algérie Poste" class="alg-poste-img">
             
-            <!-- Professional Cheque Card -->
             <div class="cheque-card">
                 <div class="cheque-header-text">Information de Paiement / معلومات الدفع</div>
                 <div class="cheque-info">
                     <p><span data-i18n="chq_name">الاسم الكامل:</span> <span id="pub-name" class="cheque-value">---</span></p>
                     <p>
                         <span data-i18n="chq_rip">رقم الحساب (RIP):</span> 
-                        <span id="pub-rip" class="cheque-value" style="font-family: monospace; letter-spacing: 2px;">---</span>
+                        <span id="pub-rip" class="cheque-value" style="font-family: monospace; letter-spacing: 2px; direction: ltr; display: inline-block;">---</span>
                         <button class="copy-btn" onclick="copyRIP()" title="نسخ الرقم"><i class="fas fa-copy"></i> <span data-i18n="btn_copy">نسخ</span></button>
                     </p>
                     <p><span data-i18n="chq_address">العنوان:</span> <span id="pub-address" class="cheque-value" style="font-size:14px;">---</span></p>
                 </div>
             </div>
 
-            <!-- Form -->
             <div class="form-container">
                 <form id="paymentForm">
                     <div class="form-group">
@@ -306,9 +313,7 @@
 
         <!-- VIEW: About & Privacy -->
         <section id="view-text" class="view-section">
-            <div class="form-container" id="textContent" style="font-size: 16px; line-height: 2;">
-                <!-- Content injected here -->
-            </div>
+            <div class="form-container" id="textContent" style="font-size: 16px; line-height: 2;"></div>
         </section>
 
         <!-- VIEW: Commercial Account Auth -->
@@ -330,6 +335,15 @@
                 </form>
 
                 <form id="commRegForm" class="admin-tab-content">
+                    <label style="display:block; margin-bottom:8px; font-weight:bold; color:#444;">اختر خطة الاشتراك:</label>
+                    <div class="pricing-plans">
+                        <div class="plan-card active-plan" onclick="selectPlan('1 شهر', this)"><h4>1 شهر</h4><p>2000 دج</p></div>
+                        <div class="plan-card" onclick="selectPlan('3 أشهر', this)"><h4>3 أشهر</h4><p>4500 دج</p></div>
+                        <div class="plan-card" onclick="selectPlan('6 أشهر', this)"><h4>6 أشهر</h4><p>6500 دج</p></div>
+                        <div class="plan-card" onclick="selectPlan('12 شهر', this)"><h4>12 شهر</h4><p>10000 دج</p></div>
+                    </div>
+                    <input type="hidden" id="cr_plan" value="1 شهر" required>
+
                     <div class="form-group"><label data-i18n="frm_name">الاسم الكامل</label><input type="text" id="cr_name" class="form-control" required></div>
                     <div class="form-group"><label data-i18n="frm_phone">رقم الهاتف</label><input type="text" id="cr_phone" class="form-control" required></div>
                     <div class="form-group"><label>Email</label><input type="email" id="cr_email" class="form-control" required></div>
@@ -348,15 +362,14 @@
                     <h3 style="color:var(--danger-red);">Admin Secure Access</h3>
                     <p style="font-size: 12px; color: #777;">برمجة خاصة لا تخضع لمصادقة الإيميل</p>
                 </div>
-                <!-- Admin login strictly uses username & token offline/hardcoded -->
                 <form id="adminLoginForm">
                     <div class="form-group">
                         <label>Username (اسم المستخدم)</label>
-                        <input type="text" id="admin_user" class="form-control" required autocomplete="off" placeholder="admin">
+                        <input type="text" id="admin_user" class="form-control" required autocomplete="off">
                     </div>
                     <div class="form-group">
                         <label>Password Token (الرمز السري)</label>
-                        <input type="password" id="admin_pass" class="form-control" required autocomplete="off" placeholder="#abobob2026#">
+                        <input type="password" id="admin_pass" class="form-control" required autocomplete="off">
                     </div>
                     <button type="submit" class="btn-submit bg-red" style="background: var(--danger-red);"><i class="fas fa-lock-open"></i> Access Dashboard</button>
                 </form>
@@ -366,11 +379,11 @@
         <!-- VIEW: Dashboard (Admin & Commercial) -->
         <section id="view-dashboard" class="view-section">
             <div class="dash-cards">
-                <div class="card c-blue"> <h3 id="st_new">0</h3> <p data-i18n="st_new">دفعات جديدة</p> </div>
-                <div class="card c-green"> <h3 id="st_all">0</h3> <p data-i18n="st_all">جميع الدفعات</p> </div>
-                <div class="card c-orange"> <h3 id="st_rep">0</h3> <p data-i18n="st_rep">الإبلاغات</p> </div>
-                <div class="card c-red"> <h3 id="st_fail">0</h3> <p data-i18n="st_fail">دفع فاشل</p> </div>
-                <div class="card c-purple admin-only"> <h3 id="st_comm">0</h3> <p data-i18n="st_comm">حساب تجاري</p> </div>
+                <div class="card c-blue" onclick="openFilteredTab('payments', 'pending')"> <h3 id="st_new">0</h3> <p data-i18n="st_new">دفعات جديدة</p> </div>
+                <div class="card c-green" onclick="openFilteredTab('payments', 'all')"> <h3 id="st_all">0</h3> <p data-i18n="st_all">جميع الدفعات</p> </div>
+                <div class="card c-orange" onclick="openFilteredTab('reports', 'all')"> <h3 id="st_rep">0</h3> <p data-i18n="st_rep">الإبلاغات</p> </div>
+                <div class="card c-red" onclick="openFilteredTab('failed', 'all')"> <h3 id="st_fail">0</h3> <p data-i18n="st_fail">دفع فاشل</p> </div>
+                <div class="card c-purple admin-only" onclick="openFilteredTab('accounts', 'all')"> <h3 id="st_comm">0</h3> <p data-i18n="st_comm">حساب تجاري</p> </div>
             </div>
 
             <div id="companyUrlContainer" style="display:none; background:#e9ecef; padding:15px; border-radius:8px; margin-bottom:20px; text-align:center; font-weight:bold; border: 1px dashed var(--primary-blue);">
@@ -388,11 +401,15 @@
 
             <!-- Payments Tab -->
             <div id="tab-payments" class="admin-tab-content active">
+                <div class="table-toolbar">
+                    <input type="text" id="searchPay" class="search-box" placeholder="ابحث عن اسم، هاتف، دورة..." onkeyup="filterTable('searchPay', 'tbl_payments')">
+                    <button class="btn-export" onclick="exportData('main_tbl_pay', 'المدفوعات')"><i class="fas fa-file-csv"></i> تحميل CSV</button>
+                </div>
                 <div class="table-responsive">
-                    <table>
+                    <table id="main_tbl_pay">
                         <thead>
                             <tr>
-                                <th>الوقت والتاريخ</th> <th>الاسم</th> <th>الولاية</th> <th>الدورة</th> <th>الهاتف</th> <th>Reçu</th> <th>المدة</th> <th>الحالة / إجراء</th>
+                                <th>الوقت والتاريخ</th> <th>الاسم</th> <th>الولاية</th> <th>RIP</th> <th>الدورة</th> <th>الهاتف</th> <th>Reçu</th> <th>المدة</th> <th>الحالة / إجراء</th>
                             </tr>
                         </thead>
                         <tbody id="tbl_payments"></tbody>
@@ -402,8 +419,12 @@
 
             <!-- Failed Tab -->
             <div id="tab-failed" class="admin-tab-content">
+                <div class="table-toolbar">
+                    <input type="text" id="searchFail" class="search-box" placeholder="ابحث عن اسم، دورة..." onkeyup="filterTable('searchFail', 'tbl_failed')">
+                    <button class="btn-export" onclick="exportData('main_tbl_fail', 'الدفع_الفاشل')"><i class="fas fa-file-csv"></i> تحميل CSV</button>
+                </div>
                 <div class="table-responsive">
-                    <table>
+                    <table id="main_tbl_fail">
                         <thead><tr><th>الوقت والتاريخ</th> <th>الاسم</th> <th>الدورة</th> <th>Reçu</th> <th>الحالة</th></tr></thead>
                         <tbody id="tbl_failed"></tbody>
                     </table>
@@ -422,17 +443,17 @@
 
             <!-- Accounts Tab (Admin Only) -->
             <div id="tab-accounts" class="admin-tab-content admin-only">
-                <h4 style="margin-bottom:15px; color:var(--primary-blue);"><i class="fas fa-user-clock"></i> طلبات جديدة قيد الانتظار</h4>
+                <h4 style="margin-bottom:15px; color:var(--primary-blue);"><i class="fas fa-user-clock"></i> طلبات حسابات تجارية جديدة</h4>
                 <div class="table-responsive" style="margin-bottom:25px;">
                     <table>
-                        <thead><tr><th>الشركة</th><th>الاسم</th><th>الهاتف</th><th>إجراء</th></tr></thead>
+                        <thead><tr><th>الشركة</th><th>الاسم</th><th>البريد</th><th>الهاتف</th><th>الاشتراك</th><th>إجراء</th></tr></thead>
                         <tbody id="tbl_acc_req"></tbody>
                     </table>
                 </div>
                 <h4 style="margin-bottom:15px; color:var(--success-green);"><i class="fas fa-user-check"></i> حسابات تجارية نشطة</h4>
                 <div class="table-responsive">
                     <table>
-                        <thead><tr><th>تاريخ الانضمام</th><th>الشركة</th><th>الرابط المخصص</th></tr></thead>
+                        <thead><tr><th>الشركة</th><th>المسؤول</th><th>البريد</th><th>الهاتف</th><th>الاشتراك</th><th>مدة النشاط</th><th>الرابط المخصص</th></tr></thead>
                         <tbody id="tbl_acc_active"></tbody>
                     </table>
                 </div>
@@ -447,7 +468,7 @@
                             <div class="form-group"><label class="ar-label">الاسم الكامل</label><input type="text" id="set_name_ar" class="form-control"></div>
                             <div class="form-group"><label class="fr-label">Nom Complet</label><input type="text" id="set_name_fr" class="form-control"></div>
                         </div>
-                        <div class="form-group"><label>رقم الحساب البريدي (RIP)</label><input type="text" id="set_rip" class="form-control" style="font-family: monospace; font-size:16px;"></div>
+                        <div class="form-group"><label>رقم الحساب البريدي (RIP)</label><input type="text" id="set_rip" class="form-control" style="font-family: monospace; font-size:16px; direction:ltr; display:block;"></div>
                         <div class="dual-input">
                             <div class="form-group"><label class="ar-label">العنوان</label><input type="text" id="set_address_ar" class="form-control"></div>
                             <div class="form-group"><label class="fr-label">Adresse</label><input type="text" id="set_address_fr" class="form-control"></div>
@@ -475,7 +496,6 @@
     </main>
 </div>
 
-<!-- Report Modal Template -->
 <template id="reportTemplate">
     <input type="text" id="rep_name" class="swal2-input" placeholder="الاسم / Nom">
     <input type="email" id="rep_email" class="swal2-input" placeholder="الإيمايل / Email">
@@ -483,7 +503,6 @@
     <textarea id="rep_desc" class="swal2-textarea" placeholder="وصف المشكل بدقة / Description détaillée"></textarea>
 </template>
 
-<!-- Firebase SDKs -->
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
     import { getFirestore, collection, addDoc, getDocs, updateDoc, doc, query, where, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
@@ -507,13 +526,11 @@
         isFirebaseReady = true;
         console.log("Firebase initialized");
     } catch (e) {
-        console.warn("Firebase initialization failed, using LocalStorage fallback for demo purposes.", e);
+        console.warn("Firebase initialization failed, using LocalStorage fallback.", e);
     }
 
-    // --- SECURE ENCAPSULATION & LOGIC ---
     (function() {
         
-        // --- 2. State Management ---
         const state = {
             lang: 'ar',
             role: 'guest', 
@@ -521,7 +538,6 @@
             targetCompany: 'default' 
         };
 
-        // --- UI Logic: Sidebar ---
         window.toggleMenu = () => {
             const sidebar = document.getElementById('sidebar');
             const overlay = document.getElementById('sidebarOverlay');
@@ -529,11 +545,9 @@
             overlay.classList.toggle('active');
         };
 
-        // --- Copy to Clipboard functionality ---
         window.copyRIP = () => {
             const ripText = document.getElementById('pub-rip').innerText;
             if(ripText === '---' || ripText === '') return;
-            
             navigator.clipboard.writeText(ripText).then(() => {
                 const msg = state.lang === 'ar' ? 'تم نسخ رقم الحساب بنجاح!' : 'RIP copié avec succès!';
                 Swal.fire({
@@ -543,7 +557,6 @@
             });
         };
 
-        // --- 3. I18N Translations ---
         const i18n = {
             ar: {
                 nav_home: "تأكيد الدفع", nav_about: "من نحن", nav_privacy: "سياسة الخصوصية", nav_report: "الإبلاغ عن مشكل", nav_commercial: "حساب تجاري", nav_logout: "تسجيل خروج",
@@ -579,7 +592,6 @@
         if(!localStorage.getItem('prouver_settings')) localStorage.setItem('prouver_settings', JSON.stringify(defaultSettings));
         if(!localStorage.getItem('prouver_db')) localStorage.setItem('prouver_db', JSON.stringify({ payments:[], reports:[], accounts:[] }));
 
-        // Universal Data Saver
         async function saveData(collectionName, data) {
             data.timestamp = Date.now();
             data.companyId = state.targetCompany; 
@@ -597,7 +609,6 @@
             return true;
         }
 
-        // UI Updates
         window.changeLanguage = (lang) => {
             state.lang = lang;
             document.documentElement.lang = lang;
@@ -609,7 +620,6 @@
                 const key = el.getAttribute('data-i18n');
                 if(i18n[lang][key]) el.innerHTML = el.innerHTML.replace(el.innerText.trim(), i18n[lang][key]); 
             });
-
             loadPublicSettings();
         };
 
@@ -631,20 +641,17 @@
             document.getElementById('pub-address').innerText = data[state.lang].address;
         }
 
-        // --- FIXED ROUTING LOGIC ---
         window.addEventListener('hashchange', handleRoute);
         window.addEventListener('load', () => {
-            changeLanguage('ar'); // Set language first
-            handleRoute();        // Then execute route
+            changeLanguage('ar'); 
+            handleRoute();        
         });
 
         function handleRoute() {
-            // Decode URI component to safely handle browsers that transform # to %23
             let hash = "";
             try { hash = decodeURIComponent(window.location.hash); } 
             catch(e) { hash = window.location.hash; }
 
-            // Using .includes() makes the admin link bulletproof regardless of trailing slashes
             if (hash.includes('admin#09#')) {
                 state.targetCompany = 'default';
                 navigate('admin_login');
@@ -659,7 +666,6 @@
             }
         }
 
-        // Public Forms
         document.getElementById('paymentForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             const btn = document.getElementById('btn_submit_pay');
@@ -667,26 +673,44 @@
             btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> جاري الإرسال...';
             btn.disabled = true;
 
-            const data = {
-                name: document.getElementById('pay_name').value,
-                phone: document.getElementById('pay_phone').value,
-                wilaya: document.getElementById('pay_wilaya').value,
-                rip: document.getElementById('pay_rip').value,
-                course: document.getElementById('pay_course').value,
-                status: 'pending',
-                fileName: document.getElementById('pay_file').files[0]?.name || 'No file'
+            const fileInput = document.getElementById('pay_file');
+            const file = fileInput.files[0];
+            let fileBase64 = "";
+
+            const processSubmit = async () => {
+                const data = {
+                    name: document.getElementById('pay_name').value,
+                    phone: document.getElementById('pay_phone').value,
+                    wilaya: document.getElementById('pay_wilaya').value,
+                    rip: document.getElementById('pay_rip').value,
+                    course: document.getElementById('pay_course').value,
+                    status: 'pending',
+                    fileName: file ? file.name : 'No file',
+                    fileData: fileBase64
+                };
+
+                await saveData('payments', data);
+                
+                Swal.fire({
+                    icon: 'success', title: i18n[state.lang].msg_success,
+                    showConfirmButton: false, timer: 2500, backdrop: `rgba(0,86,179,0.4)`
+                });
+                
+                e.target.reset();
+                btn.innerHTML = originalText;
+                btn.disabled = false;
             };
 
-            await saveData('payments', data);
-            
-            Swal.fire({
-                icon: 'success', title: i18n[state.lang].msg_success,
-                showConfirmButton: false, timer: 2500, backdrop: `rgba(0,86,179,0.4)`
-            });
-            
-            e.target.reset();
-            btn.innerHTML = originalText;
-            btn.disabled = false;
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = async (ev) => {
+                    fileBase64 = ev.target.result;
+                    await processSubmit();
+                };
+                reader.readAsDataURL(file);
+            } else {
+                await processSubmit();
+            }
         });
 
         window.openReportModal = () => {
@@ -711,12 +735,17 @@
             });
         };
 
-        // Commercial Auth
         window.toggleCommAuth = (type) => {
             document.getElementById('commLoginForm').classList.toggle('active', type==='login');
             document.getElementById('commRegForm').classList.toggle('active', type==='register');
             document.querySelectorAll('#view-commercial .admin-tabs button').forEach(b => b.classList.remove('active'));
             event.target.classList.add('active');
+        };
+
+        window.selectPlan = (plan, element) => {
+            document.querySelectorAll('.plan-card').forEach(c => c.classList.remove('active-plan'));
+            element.classList.add('active-plan');
+            document.getElementById('cr_plan').value = plan;
         };
 
         document.getElementById('commRegForm').addEventListener('submit', async(e)=>{
@@ -728,6 +757,7 @@
                 email: document.getElementById('cr_email').value,
                 company: comp,
                 pass: document.getElementById('cr_pass').value,
+                subscription: document.getElementById('cr_plan').value,
                 status: 'pending'
             });
             
@@ -743,11 +773,12 @@
             e.target.reset();
         });
 
-        document.getElementById('commLoginForm').addEventListener('submit', (e)=>{
+        document.getElementById('commLoginForm').addEventListener('submit', async (e)=>{
             e.preventDefault();
             const em = document.getElementById('cl_email').value;
             const pw = document.getElementById('cl_pass').value;
             
+            await fetchDashboardDataFromFirebase();
             let ldb = JSON.parse(localStorage.getItem('prouver_db'));
             const acc = ldb.accounts.find(a => a.email === em && a.pass === pw);
             if(acc) {
@@ -761,14 +792,11 @@
             }
         });
 
-        // Admin Auth (Strictly Custom Logic, No Firebase Auth Required)
         document.getElementById('adminLoginForm').addEventListener('submit', (e) => {
             e.preventDefault();
             const user = document.getElementById('admin_user').value.trim();
             const pass = document.getElementById('admin_pass').value;
             
-            // Checking logic offline/hardcoded
-            // I2Fib2JvYjIwMjYj is Base64 for #abobob2026#
             if (user === 'admin' && btoa(pass) === 'I2Fib2JvYjIwMjYj') {
                 login('default', 'admin');
                 document.getElementById('adminLoginForm').reset();
@@ -809,10 +837,86 @@
             document.querySelectorAll('#view-dashboard .admin-tab-content').forEach(el => el.classList.remove('active'));
             document.getElementById('tab-' + tab).classList.add('active');
             document.querySelectorAll('#view-dashboard .tab-btn').forEach(b => b.classList.remove('active'));
-            event.target.classList.add('active');
+            
+            let btnIndex = ['payments','failed','reports','accounts','settings'].indexOf(tab);
+            if(btnIndex >= 0) {
+                document.querySelectorAll('#view-dashboard .tab-btn')[btnIndex].classList.add('active');
+            }
         };
 
-        function loadDashboardData() {
+        window.openFilteredTab = (tab, filterStatus) => {
+            switchDashTab(tab);
+            let tblBody = tab === 'payments' ? 'tbl_payments' : (tab === 'failed' ? 'tbl_failed' : 'tbl_reports');
+            if(!document.getElementById(tblBody)) return;
+            
+            const rows = document.querySelectorAll(`#${tblBody} tr`);
+            rows.forEach(r => {
+                if(filterStatus === 'all') r.style.display = '';
+                else r.style.display = r.getAttribute('data-status') === filterStatus ? '' : 'none';
+            });
+        };
+
+        window.filterTable = (inputId, tableBodyId) => {
+            const filter = document.getElementById(inputId).value.toLowerCase();
+            const rows = document.querySelectorAll(`#${tableBodyId} tr`);
+            rows.forEach(row => {
+                const text = row.innerText.toLowerCase();
+                row.style.display = text.includes(filter) ? '' : 'none';
+            });
+        };
+
+        window.exportData = (tableId, filename) => {
+            const table = document.getElementById(tableId);
+            let csv = [];
+            for (let i = 0; i < table.rows.length; i++) {
+                if(table.rows[i].style.display === 'none') continue;
+                let row = [], cols = table.rows[i].querySelectorAll("td, th");
+                for (let j = 0; j < cols.length; j++) {
+                    let text = cols[j].innerText.replace(/(\r\n|\n|\r)/gm, " ").trim();
+                    row.push('"' + text.replace(/"/g, '""') + '"');
+                }
+                csv.push(row.join(","));
+            }
+            const blob = new Blob(["\uFEFF"+csv.join("\n")], { type: "text/csv;charset=utf-8;" });
+            const link = document.createElement("a");
+            link.href = URL.createObjectURL(blob);
+            link.download = filename + ".csv";
+            link.click();
+        };
+
+        window.downloadProof = (base64Data, filename) => {
+            if(!base64Data) {
+                Swal.fire('تنبيه', 'لا يوجد ملف مرفق قابل للتحميل', 'info');
+                return;
+            }
+            const link = document.createElement('a');
+            link.href = base64Data;
+            link.download = filename || 'proof_receipt';
+            link.click();
+        };
+
+        async function fetchDashboardDataFromFirebase() {
+            if (isFirebaseReady) {
+                try {
+                    let dbData = { payments: [], reports: [], accounts: [] };
+                    const [pSnap, rSnap, aSnap] = await Promise.all([
+                        getDocs(collection(db, "payments")),
+                        getDocs(collection(db, "reports")),
+                        getDocs(collection(db, "accounts"))
+                    ]);
+                    pSnap.forEach(doc => { let d = doc.data(); d.id = doc.id; dbData.payments.push(d); });
+                    rSnap.forEach(doc => { let d = doc.data(); d.id = doc.id; dbData.reports.push(d); });
+                    aSnap.forEach(doc => { let d = doc.data(); d.id = doc.id; dbData.accounts.push(d); });
+                    
+                    localStorage.setItem('prouver_db', JSON.stringify(dbData));
+                } catch(e) {
+                    console.error("Firebase fetch error", e);
+                }
+            }
+        }
+
+        async function loadDashboardData() {
+            await fetchDashboardDataFromFirebase();
             let dbData = JSON.parse(localStorage.getItem('prouver_db'));
             let sets = JSON.parse(localStorage.getItem('prouver_settings'))[state.companyId] || JSON.parse(localStorage.getItem('prouver_settings'))['default'];
             
@@ -820,13 +924,20 @@
             let myReports = state.role === 'admin' ? dbData.reports : dbData.reports.filter(r => r.companyId === state.companyId);
 
             const now = Date.now();
-            myPayments.forEach(p => {
+            let needsUpdate = false;
+            for(let p of myPayments) {
                 if(p.status === 'pending') {
                     const hrs = (now - p.timestamp) / (1000 * 60 * 60);
-                    if(hrs >= 48) p.status = 'failed';
+                    if(hrs >= 48) {
+                        p.status = 'failed';
+                        if(isFirebaseReady && p.id && !p.id.startsWith('id_')) {
+                            updateDoc(doc(db, "payments", p.id), { status: 'failed' });
+                        }
+                        needsUpdate = true;
+                    }
                 }
-            });
-            localStorage.setItem('prouver_db', JSON.stringify(dbData));
+            }
+            if(needsUpdate) localStorage.setItem('prouver_db', JSON.stringify(dbData));
 
             document.getElementById('st_all').innerText = myPayments.length;
             document.getElementById('st_new').innerText = myPayments.filter(p=>p.status==='pending').length;
@@ -846,10 +957,10 @@
                     `<button class="btn-action bg-blue" onclick="changePayStatus('${p.id}', 'paid')">قبول</button>
                      <button class="btn-action bg-red" onclick="changePayStatus('${p.id}', 'failed')">رفض</button>`;
 
-                tbodyP.innerHTML += `<tr>
+                tbodyP.innerHTML += `<tr data-status="${p.status}">
                     <td dir="ltr">${new Date(p.timestamp).toLocaleString()}</td>
-                    <td>${p.name}</td><td>${p.wilaya}</td><td>${p.course || '-'}</td><td dir="ltr">${p.phone}</td>
-                    <td>${p.fileName}</td>
+                    <td>${p.name}</td><td>${p.wilaya}</td><td style="font-family:monospace; direction:ltr;">${p.rip}</td><td>${p.course || '-'}</td><td dir="ltr">${p.phone}</td>
+                    <td>${p.fileName} <br><button onclick="downloadProof('${p.fileData}', '${p.fileName}')" class="btn-action bg-green" title="تحميل الإثبات"><i class="fas fa-download"></i></button></td>
                     <td><span class="status-badge ${timeColor}">${timeTxt}</span></td>
                     <td>${actionHtml}</td>
                 </tr>`;
@@ -860,7 +971,8 @@
             myPayments.filter(p=>p.status === 'failed').forEach(p => {
                 tbodyF.innerHTML += `<tr>
                     <td dir="ltr">${new Date(p.timestamp).toLocaleString()}</td>
-                    <td>${p.name}</td><td>${p.course || '-'}</td><td>${p.fileName}</td>
+                    <td>${p.name}</td><td>${p.course || '-'}</td>
+                    <td>${p.fileName} <br><button onclick="downloadProof('${p.fileData}', '${p.fileName}')" class="btn-action bg-green"><i class="fas fa-download"></i></button></td>
                     <td><span class="status-badge bg-red"><i class="fas fa-times"></i> فاشل</span></td>
                 </tr>`;
             });
@@ -876,12 +988,16 @@
                 
                 dbData.accounts.forEach(a => {
                     if(a.status === 'pending') {
-                        tbodyReq.innerHTML += `<tr><td>${a.company}</td><td>${a.name}</td><td dir="ltr">${a.phone}</td>
+                        tbodyReq.innerHTML += `<tr><td>${a.company}</td><td>${a.name}</td><td>${a.email}</td><td dir="ltr">${a.phone}</td><td><span class="status-badge bg-orange">${a.subscription || '-'}</span></td>
                             <td><button class="btn-action bg-green" onclick="accAction('${a.id}','active')"><i class="fas fa-check"></i> موافقة</button></td></tr>`;
                     } else {
                         const lnk = window.location.origin + window.location.pathname + '#/' + encodeURIComponent(a.company);
-                        tbodyAct.innerHTML += `<tr><td dir="ltr">${new Date(a.timestamp).toLocaleString()}</td><td>${a.company}</td>
-                            <td dir="ltr"><a href="${lnk}" target="_blank" style="color:var(--primary-blue); text-decoration:none;"><i class="fas fa-external-link-alt"></i> ${lnk}</a></td></tr>`;
+                        const daysActive = Math.floor((now - a.timestamp) / (1000 * 60 * 60 * 24));
+                        tbodyAct.innerHTML += `<tr>
+                            <td>${a.company}</td><td>${a.name}</td><td>${a.email}</td><td dir="ltr">${a.phone}</td>
+                            <td><span class="status-badge bg-blue">${a.subscription || '-'}</span></td>
+                            <td>${daysActive} يوم</td>
+                            <td dir="ltr"><a href="${lnk}" target="_blank" style="color:var(--primary-blue); text-decoration:none;"><i class="fas fa-external-link-alt"></i> رابط المتجر</a></td></tr>`;
                     }
                 });
             }
@@ -900,16 +1016,30 @@
             }
         }
 
-        window.changePayStatus = (id, newStatus) => {
-            let dbData = JSON.parse(localStorage.getItem('prouver_db'));
-            let p = dbData.payments.find(x => x.id === id);
-            if(p) { p.status = newStatus; localStorage.setItem('prouver_db', JSON.stringify(dbData)); loadDashboardData(); }
+        window.changePayStatus = async (id, newStatus) => {
+            if (isFirebaseReady && !id.startsWith('id_')) {
+                try {
+                    await updateDoc(doc(db, "payments", id), { status: newStatus });
+                } catch(e) { console.error(e); }
+            } else {
+                let dbData = JSON.parse(localStorage.getItem('prouver_db'));
+                let p = dbData.payments.find(x => x.id === id);
+                if(p) { p.status = newStatus; localStorage.setItem('prouver_db', JSON.stringify(dbData)); }
+            }
+            loadDashboardData();
         };
 
-        window.accAction = (id, newStatus) => {
-            let dbData = JSON.parse(localStorage.getItem('prouver_db'));
-            let a = dbData.accounts.find(x => x.id === id);
-            if(a) { a.status = newStatus; localStorage.setItem('prouver_db', JSON.stringify(dbData)); loadDashboardData(); }
+        window.accAction = async (id, newStatus) => {
+            if (isFirebaseReady && !id.startsWith('id_')) {
+                try {
+                    await updateDoc(doc(db, "accounts", id), { status: newStatus });
+                } catch(e) { console.error(e); }
+            } else {
+                let dbData = JSON.parse(localStorage.getItem('prouver_db'));
+                let a = dbData.accounts.find(x => x.id === id);
+                if(a) { a.status = newStatus; localStorage.setItem('prouver_db', JSON.stringify(dbData)); }
+            }
+            loadDashboardData();
         };
 
         document.getElementById('settingsForm').addEventListener('submit', (e)=>{
