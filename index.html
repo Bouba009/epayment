@@ -266,12 +266,12 @@
         </div>
         <nav id="sidebarMenu">
             <a onclick="navigate('home'); toggleMenu();" data-i18n="nav_home"><i class="fas fa-shield-alt" style="width:25px; color:var(--primary-blue);"></i> تأكيد الدفع</a>
-            <a onclick="navigate('about'); toggleMenu();" data-i18n="nav_about"><i class="fas fa-info-circle" style="width:25px; color:#555;"></i> من نحن</a>
-            <a onclick="navigate('privacy'); toggleMenu();" data-i18n="nav_privacy"><i class="fas fa-user-shield" style="width:25px; color:#555;"></i> سياسة الخصوصية</a>
-            <a onclick="openReportModal(); toggleMenu();" data-i18n="nav_report"><i class="fas fa-exclamation-triangle" style="width:25px; color:var(--warning-orange);"></i> الإبلاغ عن مشكل</a>
-            <a onclick="navigate('commercial'); toggleMenu();" data-i18n="nav_commercial"><i class="fas fa-store" style="width:25px; color:var(--success-green);"></i> حساب تجاري</a>
-            <a onclick="navigate('admin_login'); toggleMenu();" id="adminLink" style="display:none;"><i class="fas fa-tachometer-alt" style="width:25px;"></i> لوحة التحكم</a>
-            <a onclick="logout(); toggleMenu();" id="logoutLink" style="display:none; color: var(--danger-red); border-top: 1px solid #eee; margin-top: 10px;" data-i18n="nav_logout"><i class="fas fa-sign-out-alt" style="width:25px;"></i> تسجيل خروج</a>
+            <a onclick="navigate('about'); toggleMenu();" data-i18n="nav_about"><i class="fas fa-info-circle" style="width:25px; color:var(--primary-blue);"></i> من نحن</a>
+            <a onclick="navigate('privacy'); toggleMenu();" data-i18n="nav_privacy"><i class="fas fa-user-shield" style="width:25px; color:var(--primary-blue);"></i> سياسة الخصوصية</a>
+            <a onclick="openReportModal(); toggleMenu();" data-i18n="nav_report"><i class="fas fa-exclamation-triangle" style="width:25px; color:var(--primary-blue);"></i> الإبلاغ عن مشكل</a>
+            <a onclick="navigate('commercial'); toggleMenu();" data-i18n="nav_commercial"><i class="fas fa-store" style="width:25px; color:var(--primary-blue);"></i> حساب تجاري</a>
+            <a onclick="navigate('admin_login'); toggleMenu();" id="adminLink" style="display:none;"><i class="fas fa-tachometer-alt" style="width:25px; color:var(--primary-blue);"></i> لوحة التحكم</a>
+            <a onclick="logout(); toggleMenu();" id="logoutLink" style="display:none; color: var(--danger-red); border-top: 1px solid #eee; margin-top: 10px;" data-i18n="nav_logout"><i class="fas fa-sign-out-alt" style="width:25px; color:var(--primary-blue);"></i> تسجيل خروج</a>
         </nav>
     </aside>
 
@@ -357,7 +357,7 @@
 
         <!-- VIEW: About & Privacy -->
         <section id="view-text" class="view-section">
-            <div class="form-container" id="textContent" style="font-size: 16px; line-height: 2;"></div>
+            <div id="textContent"></div>
         </section>
 
         <!-- VIEW: Commercial Account Auth -->
@@ -541,6 +541,14 @@
                         </div>
                         
                         <div class="admin-only">
+                            <h4 style="margin:30px 0 20px 0; color:var(--primary-blue); border-bottom:2px solid #eee; padding-bottom:10px;"><i class="fas fa-globe"></i> إعدادات اللغة (Default Language)</h4>
+                            <div class="form-group">
+                                <select id="set_default_lang" class="form-control">
+                                    <option value="ar">العربية (Arabic)</option>
+                                    <option value="fr">الفرنسية (Français)</option>
+                                </select>
+                            </div>
+
                             <h4 style="margin:30px 0 20px 0; color:var(--primary-blue); border-bottom:2px solid #eee; padding-bottom:10px;"><i class="fas fa-file-alt"></i> محتوى صفحات النظام</h4>
                             <div class="dual-input">
                                 <div class="form-group"><label class="ar-label">من نحن</label><textarea id="set_about_ar" class="form-control" rows="4"></textarea></div>
@@ -666,7 +674,8 @@
             default: {
                 ar: { name: "مؤسسة بروفر", address: "الجزائر العاصمة", about: "نحن مؤسسة...", priv: "سياسة الخصوصية..." },
                 fr: { name: "Prouver Entreprise", address: "Alger, Algérie", about: "Nous sommes...", priv: "Politique..." },
-                rip: "0000000000"
+                rip: "0000000000",
+                defaultLang: "ar"
             }
         };
         if(!localStorage.getItem('prouver_settings')) localStorage.setItem('prouver_settings', JSON.stringify(defaultSettings));
@@ -724,7 +733,13 @@
                     content = defaultSets[state.lang] ? defaultSets[state.lang][viewId === 'about'? 'about' : 'priv'] : '';
                 }
                 
-                document.getElementById('textContent').innerHTML = `<h3 style="color:var(--primary-blue); border-bottom:2px solid #eee; padding-bottom:10px; margin-bottom:15px;"><i class="fas fa-file-alt"></i> ${i18n[state.lang]['nav_'+viewId]}</h3><p style="white-space: pre-wrap;">${content || ''}</p>`;
+                document.getElementById('textContent').innerHTML = `
+                <div style="border: 2px solid var(--primary-blue); border-radius: 12px; padding: 25px; background: #fff; box-shadow: var(--box-shadow); margin-top: 10px;">
+                    <h3 style="color:var(--primary-blue); border-bottom:2px solid #eee; padding-bottom:10px; margin-bottom:15px;">
+                        <i class="fas ${viewId === 'about' ? 'fa-info-circle' : 'fa-user-shield'}"></i> ${i18n[state.lang]['nav_'+viewId]}
+                    </h3>
+                    <p style="white-space: pre-wrap; color: #444; line-height: 1.8; font-size: 16px;">${content || (state.lang === 'ar' ? 'لا يوجد محتوى حاليا.' : 'Aucun contenu pour le moment.')}</p>
+                </div>`;
             }
         };
 
@@ -782,7 +797,16 @@
         window.addEventListener('hashchange', handleRoute);
         
         window.addEventListener('load', () => {
-            changeLanguage('ar'); 
+            let hashStr = window.location.hash;
+            let tempCompany = 'default';
+            if (hashStr.startsWith('#/') && !hashStr.includes('admin#09#')) {
+                tempCompany = hashStr.replace('#/', '');
+            }
+            let setsInit = JSON.parse(localStorage.getItem('prouver_settings')) || {};
+            let tSet = setsInit[tempCompany] || setsInit['default'] || {};
+            let initLang = tSet.defaultLang || (setsInit['default'] ? setsInit['default'].defaultLang : 'ar') || 'ar';
+            
+            changeLanguage(initLang); 
             
             const savedAuth = JSON.parse(localStorage.getItem('prouver_auth'));
             if(savedAuth) {
@@ -975,7 +999,8 @@
             let initialSets = {
                 ar: { name: comp, address: "", about: "", priv: "" },
                 fr: { name: comp, address: "", about: "", priv: "" },
-                rip: ""
+                rip: "",
+                defaultLang: "ar"
             };
 
             let sets = JSON.parse(localStorage.getItem('prouver_settings'));
@@ -1376,6 +1401,7 @@
                 document.getElementById('set_about_fr').value = sets.fr?.about || "";
                 document.getElementById('set_priv_ar').value = sets.ar?.priv || "";
                 document.getElementById('set_priv_fr').value = sets.fr?.priv || "";
+                document.getElementById('set_default_lang').value = sets.defaultLang || "ar";
             }
         }
 
@@ -1430,6 +1456,7 @@
                 cur.fr.about = document.getElementById('set_about_fr').value;
                 cur.ar.priv = document.getElementById('set_priv_ar').value;
                 cur.fr.priv = document.getElementById('set_priv_fr').value;
+                cur.defaultLang = document.getElementById('set_default_lang').value;
             }
 
             allSets[state.companyId] = cur;
