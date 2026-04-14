@@ -31,24 +31,19 @@
         /* Layout */
         .app-container { display: flex; min-height: 100vh; flex-direction: column; }
         
-        /* --- New Sidebar & Overlay Logic (Hidden on Left) --- */
+        /* --- Sidebar & Overlay Logic --- */
         .sidebar-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.5); z-index: 1040; display: none; opacity: 0; transition: opacity 0.3s; }
         .sidebar-overlay.active { display: block; opacity: 1; }
 
-        .sidebar { position: fixed; top: 0; left: -280px; /* Hidden on the left strictly */ width: 280px; height: 100vh; background: #fff; box-shadow: 2px 0 15px rgba(0,0,0,0.2); padding: 20px 0; display: flex; flex-direction: column; transition: left 0.4s cubic-bezier(0.4, 0, 0.2, 1); z-index: 1050; overflow-y: auto;}
+        .sidebar { position: fixed; top: 0; left: -280px; width: 280px; height: 100vh; background: #fff; box-shadow: 2px 0 15px rgba(0,0,0,0.2); padding: 20px 0; display: flex; flex-direction: column; transition: left 0.4s cubic-bezier(0.4, 0, 0.2, 1); z-index: 1050; overflow-y: auto;}
         .sidebar.open { left: 0; }
         
-        /* Logo Continuous Animation */
-        @keyframes pulseLogo {
-            0% { transform: scale(1); filter: drop-shadow(0 0 5px rgba(0,86,179,0.3)); }
-            50% { transform: scale(1.05); filter: drop-shadow(0 0 15px rgba(0,86,179,0.6)); }
-            100% { transform: scale(1); filter: drop-shadow(0 0 5px rgba(0,86,179,0.3)); }
-        }
-        .sidebar-logo { text-align: center; font-size: 32px; font-weight: 800; color: var(--primary-blue); margin-bottom: 30px; letter-spacing: 1px; animation: pulseLogo 2.5s infinite ease-in-out; display: flex; justify-content: center; align-items: center; gap: 8px;}
+        /* Logo in sidebar (Static) */
+        .sidebar-logo { text-align: center; font-size: 32px; font-weight: 800; color: var(--primary-blue); margin-bottom: 30px; letter-spacing: 1px; display: flex; justify-content: center; align-items: center; gap: 8px;}
         .sidebar-logo i { color: var(--success-green); font-size: 26px; }
         
         .sidebar a { display: block; padding: 15px 25px; color: var(--text-dark); text-decoration: none; font-weight: 600; border-bottom: 1px solid #eee; transition: 0.3s; cursor: pointer;}
-        .sidebar a:hover { background: var(--primary-blue); color: #fff; padding-left: 35px; } /* Hover moves inward */
+        .sidebar a:hover { background: var(--primary-blue); color: #fff; padding-left: 35px; } 
         
         /* Main Content */
         .main-content { flex: 1; padding: 20px; width: 100%; max-width: 1200px; margin: 0 auto; transition: 0.3s; }
@@ -60,8 +55,6 @@
         .menu-btn { background: var(--primary-blue); color: #fff; border: none; width: 40px; height: 40px; border-radius: 5px; font-size: 20px; cursor: pointer; display: flex; justify-content: center; align-items: center; transition: 0.3s; box-shadow: 0 2px 5px rgba(0,0,0,0.2);}
         .menu-btn:hover { background: var(--primary-dark); transform: scale(1.05); }
 
-        #pageTitle { color: var(--primary-blue); font-weight: 800; font-size: 22px;}
-
         .lang-switch button { padding: 5px 15px; border: 1px solid var(--primary-blue); background: transparent; color: var(--primary-blue); border-radius: 20px; cursor: pointer; transition: 0.3s; font-weight: bold; margin: 0 2px;}
         .lang-switch button.active { background: var(--primary-blue); color: #fff; }
 
@@ -70,11 +63,20 @@
         .view-section.active { display: block; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
+        /* --- Main Animated Logo (On Home Page) --- */
+        @keyframes pulseLogo {
+            0% { transform: scale(1); filter: drop-shadow(0 0 5px rgba(0,86,179,0.3)); }
+            50% { transform: scale(1.05); filter: drop-shadow(0 0 15px rgba(0,86,179,0.6)); }
+            100% { transform: scale(1); filter: drop-shadow(0 0 5px rgba(0,86,179,0.3)); }
+        }
+        .main-animated-header { text-align: center; margin-bottom: 25px; margin-top: 10px; }
+        .main-logo-anim { font-size: 45px; font-weight: 900; color: var(--primary-blue); animation: pulseLogo 2.5s infinite ease-in-out; display: flex; justify-content: center; align-items: center; gap: 12px; margin-bottom: 10px;}
+        .main-logo-anim i { color: var(--success-green); font-size: 38px; }
+        .main-title-text { color: var(--primary-blue); font-weight: 800; font-size: 24px; letter-spacing: 1px; }
+
         /* --- Professional Cheque UI --- */
         .cheque-card { background: var(--cheque-bg); border: 1px solid #d4c08c; border-radius: 12px; padding: 25px; margin: 20px 0; position: relative; box-shadow: inset 0 0 20px rgba(200,180,100,0.2), 0 5px 15px rgba(0,0,0,0.08); overflow: hidden; }
-        /* Micro-print border simulation */
         .cheque-card::before { content: ""; position: absolute; top: 5px; left: 5px; right: 5px; bottom: 5px; border: 1px dashed rgba(0,0,0,0.1); pointer-events: none; border-radius: 8px;}
-        /* Watermark */
         .cheque-card::after { content: "Algérie Poste"; position: absolute; opacity: 0.05; font-size: 50px; font-weight: 900; top: 50%; left: 50%; transform: translate(-50%, -50%) rotate(-20deg); pointer-events: none; color: var(--primary-blue);}
         
         .cheque-header-text { font-size: 12px; font-weight: bold; color: #555; border-bottom: 2px solid var(--primary-blue); padding-bottom: 5px; margin-bottom: 15px; text-transform: uppercase; letter-spacing: 1px;}
@@ -154,7 +156,6 @@
         /* Mobile Adjustments */
         @media(max-width: 768px) {
             .header { padding: 12px 15px; }
-            #pageTitle { font-size: 18px; }
             .menu-btn { width: 35px; height: 35px; font-size: 18px;}
             .main-content { padding: 10px; }
             .cheque-card { padding: 15px; }
@@ -162,17 +163,20 @@
             .cheque-value { font-size: 16px; }
             .dual-input { flex-direction: column; gap: 0; }
             .admin-tabs button { padding: 8px 15px; font-size: 14px;}
+            .main-logo-anim { font-size: 35px; }
+            .main-title-text { font-size: 20px; }
         }
     </style>
 </head>
 <body>
 
 <div class="app-container">
-    <!-- Overlay for closing sidebar on mobile/desktop clicking outside -->
+    <!-- Overlay for closing sidebar -->
     <div id="sidebarOverlay" class="sidebar-overlay" onclick="toggleMenu()"></div>
 
     <!-- Sidebar (Hidden on Left) -->
     <aside class="sidebar" id="sidebar">
+        <!-- Static Logo in Sidebar -->
         <div class="sidebar-logo">
             <i class="fas fa-check-circle"></i>Prouver
         </div>
@@ -193,7 +197,6 @@
         <header class="header">
             <div class="header-left">
                 <button class="menu-btn" onclick="toggleMenu()"><i class="fas fa-bars"></i></button>
-                <h2 id="pageTitle" data-i18n="title_payment">تأكيد الدفع Payment</h2>
             </div>
             <div class="lang-switch">
                 <button onclick="changeLanguage('ar')" id="btn-ar" class="active">AR</button>
@@ -203,6 +206,15 @@
 
         <!-- VIEW 1: Home (Payment Form) -->
         <section id="view-home" class="view-section active">
+            
+            <!-- Animated Logo & Title (Main Page Only) -->
+            <div class="main-animated-header">
+                <div class="main-logo-anim">
+                    <i class="fas fa-check-circle"></i>Prouver
+                </div>
+                <h2 class="main-title-text" id="mainPageTitle" data-i18n="title_payment">تأكيد الدفع Payment</h2>
+            </div>
+
             <img src="https://play-lh.googleusercontent.com/4yxUE_wg_ljg1BRyO7BQ8l3siAyQZSeGx17OKyo0Y2Htt9A5oJEC7-zW0p4opjIbWQ=w600-h300-pc0xffffff-pd" alt="Algérie Poste" class="alg-poste-img">
             
             <!-- Professional Cheque Card -->
@@ -302,16 +314,17 @@
                 <div style="text-align:center; margin-bottom:25px;">
                     <i class="fas fa-user-shield" style="font-size:45px; color:var(--danger-red); margin-bottom:10px;"></i>
                     <h3 style="color:var(--danger-red);">Admin Secure Access</h3>
+                    <p style="font-size: 12px; color: #777;">برمجة خاصة لا تخضع لمصادقة الإيميل</p>
                 </div>
+                <!-- Admin login strictly uses username & token offline/hardcoded -->
                 <form id="adminLoginForm">
                     <div class="form-group">
-                        <label>Username</label>
-                        <!-- Added Username Field -->
-                        <input type="text" id="admin_user" class="form-control" required autocomplete="off" placeholder="Enter Admin Username">
+                        <label>Username (اسم المستخدم)</label>
+                        <input type="text" id="admin_user" class="form-control" required autocomplete="off" placeholder="admin">
                     </div>
                     <div class="form-group">
-                        <label>Password Token</label>
-                        <input type="password" id="admin_pass" class="form-control" required autocomplete="off" placeholder="Enter Secure Token">
+                        <label>Password Token (الرمز السري)</label>
+                        <input type="password" id="admin_pass" class="form-control" required autocomplete="off" placeholder="#abobob2026#">
                     </div>
                     <button type="submit" class="btn-submit bg-red" style="background: var(--danger-red);"><i class="fas fa-lock-open"></i> Access Dashboard</button>
                 </form>
@@ -565,14 +578,13 @@
         window.changeLanguage = (lang) => {
             state.lang = lang;
             document.documentElement.lang = lang;
-            // Keeping RTL base for sidebar structural reasons, but adjusting text align
             document.documentElement.dir = lang === 'ar' ? 'rtl' : 'ltr';
             document.getElementById('btn-ar').className = lang === 'ar' ? 'active' : '';
             document.getElementById('btn-fr').className = lang === 'fr' ? 'active' : '';
             
             document.querySelectorAll('[data-i18n]').forEach(el => {
                 const key = el.getAttribute('data-i18n');
-                if(i18n[lang][key]) el.innerHTML = el.innerHTML.replace(el.innerText.trim(), i18n[lang][key]); // Keep icons if any
+                if(i18n[lang][key]) el.innerHTML = el.innerHTML.replace(el.innerText.trim(), i18n[lang][key]); 
             });
 
             loadPublicSettings();
@@ -720,13 +732,14 @@
             }
         });
 
-        // Admin/Dashboard Logic
+        // Admin Auth (Strictly Custom Logic, No Firebase Auth Required)
         document.getElementById('adminLoginForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             const user = document.getElementById('admin_user').value.trim();
             const pass = document.getElementById('admin_pass').value;
             const hash = await hashData(pass);
             
+            // This verification is entirely local and independent of Firebase Auth
             if (user === 'admin' && hash === ADMIN_HASH) {
                 login('default', 'admin');
                 document.getElementById('adminLoginForm').reset();
