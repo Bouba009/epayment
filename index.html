@@ -351,10 +351,10 @@
                 <form id="commRegForm" class="admin-tab-content active">
                     <label style="display:block; margin-bottom:8px; font-weight:bold; color:#444;" data-i18n="txt_choose_plan">اختر خطة الاشتراك:</label>
                     <div class="pricing-plans">
-                        <div class="plan-card active-plan" onclick="selectPlan('1', this)"><h4 data-i18n="plan_1">1 شهر</h4><p>2000 دج</p></div>
-                        <div class="plan-card" onclick="selectPlan('3', this)"><h4 data-i18n="plan_3">3 أشهر</h4><p>4500 دج</p></div>
-                        <div class="plan-card" onclick="selectPlan('6', this)"><h4 data-i18n="plan_6">6 أشهر</h4><p>6500 دج</p></div>
-                        <div class="plan-card" onclick="selectPlan('12', this)"><h4 data-i18n="plan_12">12 شهر</h4><p>10000 دج</p></div>
+                        <div class="plan-card active-plan" onclick="selectPlan('1', this)"><h4 data-i18n="plan_1">1 شهر</h4><p data-i18n="price_1">2000 دج</p></div>
+                        <div class="plan-card" onclick="selectPlan('3', this)"><h4 data-i18n="plan_3">3 أشهر</h4><p data-i18n="price_3">4500 دج</p></div>
+                        <div class="plan-card" onclick="selectPlan('6', this)"><h4 data-i18n="plan_6">6 أشهر</h4><p data-i18n="price_6">6500 دج</p></div>
+                        <div class="plan-card" onclick="selectPlan('12', this)"><h4 data-i18n="plan_12">12 شهر</h4><p data-i18n="price_12">10000 دج</p></div>
                     </div>
                     <input type="hidden" id="cr_plan" value="1" required>
 
@@ -520,7 +520,7 @@
 
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-    import { getFirestore, collection, addDoc, getDocs, updateDoc, doc, query, where, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+    import { getFirestore, collection, addDoc, getDocs, updateDoc, doc, setDoc, getDoc, query, where, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
     
     const firebaseConfig = {
         apiKey: "AIzaSyBPMJ3vkjIThlGyBTKKZ44BpV0mTaT9U4Q",
@@ -586,6 +586,7 @@
                 st_new: "دفعات جديدة", st_all: "جميع الدفعات", st_rep: "الإبلاغات", st_fail: "دفع فاشل", st_comm: "حساب تجاري", st_days: "أيام متبقية",
                 tab_pay: "قسم الدفعات", tab_fail: "الدفع الفاشل", tab_rep: "الابلاغات", tab_acc: "الحسابات", tab_set: "قسم المعلومات",
                 txt_choose_plan: "اختر خطة الاشتراك:", plan_1: "1 شهر", plan_3: "3 أشهر", plan_6: "6 أشهر", plan_12: "12 شهر",
+                price_1: "2000 دج", price_3: "4500 دج", price_6: "6500 دج", price_12: "10000 دج",
                 txt_share_link: "رابط الدفع الخاص بشركتك لمشاركته مع العملاء:",
                 th_date: "الوقت والتاريخ", th_name: "الاسم", th_wilaya: "الولاية", th_course: "الدورة", th_phone: "الهاتف", th_duration: "المدة", th_action: "الحالة / إجراء", th_status: "الحالة", th_desc: "الوصف",
                 set_title_chq: "معلومات الدفع (الشيك الذي يظهر للعملاء)",
@@ -602,6 +603,7 @@
                 st_new: "Nouveaux Paiements", st_all: "Tous Paiements", st_rep: "Signalements", st_fail: "Échoués", st_comm: "Comptes Com.", st_days: "Jours Restants",
                 tab_pay: "Paiements", tab_fail: "Échoués", tab_rep: "Signalements", tab_acc: "Comptes", tab_set: "Paramètres",
                 txt_choose_plan: "Choisissez un forfait:", plan_1: "1 Mois", plan_3: "3 Mois", plan_6: "6 Mois", plan_12: "12 Mois",
+                price_1: "2000 DA", price_3: "4500 DA", price_6: "6500 DA", price_12: "10000 DA",
                 txt_share_link: "Lien de paiement de votre entreprise à partager:",
                 th_date: "Date et Heure", th_name: "Nom", th_wilaya: "Wilaya", th_course: "Formation", th_phone: "Téléphone", th_duration: "Durée", th_action: "Statut / Action", th_status: "Statut", th_desc: "Description",
                 set_title_chq: "Informations de paiement (Chèque affiché aux clients)",
@@ -666,12 +668,31 @@
             }
         };
 
-        function loadPublicSettings() {
+        async function loadPublicSettings() {
             const sets = JSON.parse(localStorage.getItem('prouver_settings'));
-            const data = sets[state.targetCompany] || sets['default'];
-            document.getElementById('pub-name').innerText = data[state.lang].name;
-            document.getElementById('pub-rip').innerText = data.rip || "---";
-            document.getElementById('pub-address').innerText = data[state.lang].address;
+            let data = sets[state.targetCompany] || sets['default'];
+            
+            const updateUI = (d) => {
+                if(d && d[state.lang]) {
+                    document.getElementById('pub-name').innerText = d[state.lang].name || "---";
+                    document.getElementById('pub-rip').innerText = d.rip || "---";
+                    document.getElementById('pub-address').innerText = d[state.lang].address || "---";
+                }
+            };
+            
+            updateUI(data);
+
+            if (isFirebaseReady && state.targetCompany !== 'default') {
+                try {
+                    const docSnap = await getDoc(doc(db, "settings", state.targetCompany));
+                    if (docSnap.exists()) {
+                        data = docSnap.data();
+                        sets[state.targetCompany] = data;
+                        localStorage.setItem('prouver_settings', JSON.stringify(sets));
+                        updateUI(data);
+                    }
+                } catch(e) { console.error("Error fetching settings:", e); }
+            }
         }
 
         window.addEventListener('hashchange', handleRoute);
@@ -794,14 +815,20 @@
                 status: 'pending'
             });
             
+            let initialSets = {
+                ar: { name: comp, address: "", about: "", priv: "" },
+                fr: { name: comp, address: "", about: "", priv: "" },
+                rip: ""
+            };
+
             let sets = JSON.parse(localStorage.getItem('prouver_settings'));
-            if(!sets[comp]) {
-                sets[comp] = {
-                    ar: { name: comp, address: "", about: "", priv: "" },
-                    fr: { name: comp, address: "", about: "", priv: "" },
-                    rip: ""
-                };
-                localStorage.setItem('prouver_settings', JSON.stringify(sets));
+            sets[comp] = initialSets;
+            localStorage.setItem('prouver_settings', JSON.stringify(sets));
+
+            if (isFirebaseReady) {
+                try {
+                    await setDoc(doc(db, "settings", comp), initialSets);
+                } catch(e) { console.error("Error creating initial settings in FB", e); }
             }
 
             Swal.fire({ icon:'info', title: i18n[state.lang].msg_reg_wait, confirmButtonColor: '#0056b3' });
@@ -811,21 +838,31 @@
         window.showRenewalPopup = (acc) => {
             let msg = state.lang === 'ar' ? 'عزيزي المستخدم لقد انتهى اشتراكك يرجى تجديد الاشتراك من اجل مواصلة عملك على prouver.online' : 'Cher utilisateur, votre abonnement a expiré. Veuillez renouveler pour continuer sur prouver.online';
             
+            let p1 = state.lang === 'ar' ? '2000 دج' : '2000 DA';
+            let p3 = state.lang === 'ar' ? '4500 دج' : '4500 DA';
+            let p6 = state.lang === 'ar' ? '6500 دج' : '6500 DA';
+            let p12 = state.lang === 'ar' ? '10000 دج' : '10000 DA';
+            
+            let t1 = state.lang === 'ar' ? '1 شهر' : '1 Mois';
+            let t3 = state.lang === 'ar' ? '3 أشهر' : '3 Mois';
+            let t6 = state.lang === 'ar' ? '6 أشهر' : '6 Mois';
+            let t12 = state.lang === 'ar' ? '12 شهر' : '12 Mois';
+
             Swal.fire({
                 title: '<i class="fas fa-lock" style="color:#dc3545; font-size:40px;"></i><br>اشتراك منتهي',
                 html: `
                     <p style="font-weight:bold; color:#555; margin-bottom:20px;">${msg}</p>
                     <div class="pricing-plans" style="justify-content:center;">
-                        <div class="plan-card active-plan" onclick="document.querySelectorAll('.plan-card').forEach(c=>c.classList.remove('active-plan')); this.classList.add('active-plan'); document.getElementById('swal_plan').value='1';"><h4>1 شهر</h4><p>2000 دج</p></div>
-                        <div class="plan-card" onclick="document.querySelectorAll('.plan-card').forEach(c=>c.classList.remove('active-plan')); this.classList.add('active-plan'); document.getElementById('swal_plan').value='3';"><h4>3 أشهر</h4><p>4500 دج</p></div>
-                        <div class="plan-card" onclick="document.querySelectorAll('.plan-card').forEach(c=>c.classList.remove('active-plan')); this.classList.add('active-plan'); document.getElementById('swal_plan').value='6';"><h4>6 أشهر</h4><p>6500 دج</p></div>
-                        <div class="plan-card" onclick="document.querySelectorAll('.plan-card').forEach(c=>c.classList.remove('active-plan')); this.classList.add('active-plan'); document.getElementById('swal_plan').value='12';"><h4>12 شهر</h4><p>10000 دج</p></div>
+                        <div class="plan-card active-plan" onclick="document.querySelectorAll('.plan-card').forEach(c=>c.classList.remove('active-plan')); this.classList.add('active-plan'); document.getElementById('swal_plan').value='1';"><h4>${t1}</h4><p>${p1}</p></div>
+                        <div class="plan-card" onclick="document.querySelectorAll('.plan-card').forEach(c=>c.classList.remove('active-plan')); this.classList.add('active-plan'); document.getElementById('swal_plan').value='3';"><h4>${t3}</h4><p>${p3}</p></div>
+                        <div class="plan-card" onclick="document.querySelectorAll('.plan-card').forEach(c=>c.classList.remove('active-plan')); this.classList.add('active-plan'); document.getElementById('swal_plan').value='6';"><h4>${t6}</h4><p>${p6}</p></div>
+                        <div class="plan-card" onclick="document.querySelectorAll('.plan-card').forEach(c=>c.classList.remove('active-plan')); this.classList.add('active-plan'); document.getElementById('swal_plan').value='12';"><h4>${t12}</h4><p>${p12}</p></div>
                     </div>
                     <input type="hidden" id="swal_plan" value="1">
                 `,
                 showCancelButton: true,
-                confirmButtonText: 'تجديد اشتراك',
-                cancelButtonText: 'إلغاء',
+                confirmButtonText: state.lang === 'ar' ? 'تجديد اشتراك' : 'Renouveler',
+                cancelButtonText: state.lang === 'ar' ? 'إلغاء' : 'Annuler',
                 confirmButtonColor: '#0056b3',
                 preConfirm: () => {
                     return document.getElementById('swal_plan').value;
@@ -833,7 +870,7 @@
             }).then((result) => {
                 if(result.isConfirmed) {
                     accAction(acc.id, 'renewal_pending', result.value);
-                    Swal.fire('تم الإرسال', 'تم إرسال طلب التجديد للإدارة، يرجى الانتظار.', 'success');
+                    Swal.fire(state.lang === 'ar' ? 'تم الإرسال' : 'Envoyé', state.lang === 'ar' ? 'تم إرسال طلب التجديد للإدارة، يرجى الانتظار.' : 'Demande de renouvellement envoyée avec succès.', 'success');
                 }
             });
         };
@@ -1102,17 +1139,17 @@
                 }
             }
 
-            document.getElementById('set_name_ar').value = sets.ar.name || "";
-            document.getElementById('set_name_fr').value = sets.fr.name || "";
+            document.getElementById('set_name_ar').value = sets.ar?.name || "";
+            document.getElementById('set_name_fr').value = sets.fr?.name || "";
             document.getElementById('set_rip').value = sets.rip || "";
-            document.getElementById('set_address_ar').value = sets.ar.address || "";
-            document.getElementById('set_address_fr').value = sets.fr.address || "";
+            document.getElementById('set_address_ar').value = sets.ar?.address || "";
+            document.getElementById('set_address_fr').value = sets.fr?.address || "";
             
             if(state.role === 'admin') {
-                document.getElementById('set_about_ar').value = sets.ar.about || "";
-                document.getElementById('set_about_fr').value = sets.fr.about || "";
-                document.getElementById('set_priv_ar').value = sets.ar.priv || "";
-                document.getElementById('set_priv_fr').value = sets.fr.priv || "";
+                document.getElementById('set_about_ar').value = sets.ar?.about || "";
+                document.getElementById('set_about_fr').value = sets.fr?.about || "";
+                document.getElementById('set_priv_ar').value = sets.ar?.priv || "";
+                document.getElementById('set_priv_fr').value = sets.fr?.priv || "";
             }
         }
 
@@ -1151,7 +1188,7 @@
             if(state.role === 'admin' || state.role === 'commercial') loadDashboardData();
         };
 
-        document.getElementById('settingsForm').addEventListener('submit', (e)=>{
+        document.getElementById('settingsForm').addEventListener('submit', async (e)=>{
             e.preventDefault();
             let allSets = JSON.parse(localStorage.getItem('prouver_settings'));
             
@@ -1171,6 +1208,13 @@
 
             allSets[state.companyId] = cur;
             localStorage.setItem('prouver_settings', JSON.stringify(allSets));
+            
+            if (isFirebaseReady) {
+                try {
+                    await setDoc(doc(db, "settings", state.companyId), cur);
+                } catch(error) { console.error("Error saving settings to FB", error); }
+            }
+
             Swal.fire({icon:'success', title: state.lang==='ar'?'تم الحفظ':'Sauvegardé', text: state.lang==='ar'?'تم تحديث المعلومات بنجاح':'Informations mises à jour avec succès', confirmButtonColor:'#0056b3'});
             loadPublicSettings(); 
         });
