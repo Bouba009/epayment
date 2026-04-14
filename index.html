@@ -4,10 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Prouver - Payment Verification</title>
-    <!-- Fonts & Icons -->
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- SweetAlert2 for Professional Animated Popups -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <style>
@@ -256,7 +254,6 @@
             </div>
         </header>
 
-        <!-- VIEW 1: Home (Payment Form) -->
         <section id="view-home" class="view-section active">
             
             <div class="main-animated-header">
@@ -325,12 +322,10 @@
             </div>
         </section>
 
-        <!-- VIEW: About & Privacy -->
         <section id="view-text" class="view-section">
             <div class="form-container" id="textContent" style="font-size: 16px; line-height: 2;"></div>
         </section>
 
-        <!-- VIEW: Commercial Account Auth -->
         <section id="view-commercial" class="view-section">
             <div class="login-container">
                 <div style="text-align:center; margin-bottom:20px;">
@@ -368,7 +363,6 @@
             </div>
         </section>
 
-        <!-- VIEW: Admin Login -->
         <section id="view-admin_login" class="view-section">
             <div class="login-container" style="border-top-color: var(--danger-red);">
                 <div style="text-align:center; margin-bottom:25px;">
@@ -390,7 +384,6 @@
             </div>
         </section>
 
-        <!-- VIEW: Dashboard (Admin & Commercial) -->
         <section id="view-dashboard" class="view-section">
             <div class="dash-cards">
                 <div class="card c-blue" onclick="openFilteredTab('payments', 'pending')"> <h3 id="st_new">0</h3> <p data-i18n="st_new">دفعات جديدة</p> </div>
@@ -414,7 +407,6 @@
                 <button class="tab-btn" onclick="switchDashTab('settings')" data-i18n="tab_set"><i class="fas fa-cogs"></i> قسم المعلومات</button>
             </div>
 
-            <!-- Payments Tab -->
             <div id="tab-payments" class="admin-tab-content active">
                 <div class="table-toolbar">
                     <input type="text" id="searchPay" class="search-box" data-i18n-placeholder="pl_search_pay" placeholder="ابحث عن اسم، هاتف، دورة..." onkeyup="filterTable('searchPay', 'tbl_payments')">
@@ -432,7 +424,6 @@
                 </div>
             </div>
 
-            <!-- Failed Tab -->
             <div id="tab-failed" class="admin-tab-content">
                 <div class="table-toolbar">
                     <input type="text" id="searchFail" class="search-box" data-i18n-placeholder="pl_search_fail" placeholder="ابحث عن اسم، دورة..." onkeyup="filterTable('searchFail', 'tbl_failed')">
@@ -446,7 +437,6 @@
                 </div>
             </div>
 
-            <!-- Reports Tab -->
             <div id="tab-reports" class="admin-tab-content">
                 <div class="table-responsive">
                     <table>
@@ -456,7 +446,6 @@
                 </div>
             </div>
 
-            <!-- Accounts Tab (Admin Only) -->
             <div id="tab-accounts" class="admin-tab-content admin-only">
                 <h4 style="margin-bottom:15px; color:var(--primary-blue);"><i class="fas fa-user-clock"></i> طلبات حسابات تجارية (جديدة / تفعيل)</h4>
                 <div class="table-responsive" style="margin-bottom:25px;">
@@ -474,7 +463,6 @@
                 </div>
             </div>
 
-            <!-- Settings Tab -->
             <div id="tab-settings" class="admin-tab-content">
                 <div class="form-container">
                     <form id="settingsForm">
@@ -682,7 +670,7 @@
             
             updateUI(data);
 
-            if (isFirebaseReady && state.targetCompany !== 'default') {
+            if (isFirebaseReady) {
                 try {
                     const docSnap = await getDoc(doc(db, "settings", state.targetCompany));
                     if (docSnap.exists()) {
