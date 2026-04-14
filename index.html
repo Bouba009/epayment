@@ -564,7 +564,7 @@
 
         window.copyRIP = () => {
             const ripText = document.getElementById('pub-rip').innerText;
-            if(ripText === '---' || ripText === '') return;
+            if(ripText === '---' || ripText === '' || ripText === '...') return;
             navigator.clipboard.writeText(ripText).then(() => {
                 const msg = state.lang === 'ar' ? 'تم نسخ رقم الحساب بنجاح!' : 'RIP copié avec succès!';
                 Swal.fire({
@@ -679,7 +679,7 @@
 
         async function loadPublicSettings() {
             const sets = JSON.parse(localStorage.getItem('prouver_settings'));
-            let data = sets[state.targetCompany] || sets['default'];
+            let data = sets[state.targetCompany]; 
             
             const updateUI = (d) => {
                 if(d && d[state.lang]) {
@@ -689,7 +689,15 @@
                 }
             };
             
-            updateUI(data);
+            if (data) {
+                updateUI(data);
+            } else if (state.targetCompany === 'default') {
+                updateUI(sets['default']);
+            } else {
+                document.getElementById('pub-name').innerText = "...";
+                document.getElementById('pub-rip').innerText = "...";
+                document.getElementById('pub-address').innerText = "...";
+            }
 
             if (isFirebaseReady) {
                 try {
@@ -709,6 +717,8 @@
                         sets[state.targetCompany] = data;
                         needsSave = true;
                         updateUI(data);
+                    } else if (state.targetCompany !== 'default') {
+                        updateUI(sets['default']);
                     }
 
                     if (needsSave) {
@@ -723,7 +733,6 @@
         window.addEventListener('load', () => {
             changeLanguage('ar'); 
             
-            // استعادة جلسة تسجيل الدخول من التخزين المحلي بعد التحديث
             const savedAuth = JSON.parse(localStorage.getItem('prouver_auth'));
             if(savedAuth) {
                 login(savedAuth.companyId, savedAuth.role, true);
@@ -733,7 +742,6 @@
             setupRealtimeListeners();
         });
 
-        // وظيفة التحديث اللحظي الأوتوماتيكي باستخدام onSnapshot
         function setupRealtimeListeners() {
             if (!isFirebaseReady) return;
 
@@ -816,7 +824,6 @@
                 btn.disabled = false;
             };
 
-            // ضغط الصور أوتوماتيكياً قبل الرفع لكي لا تتجاوز 500 KB
             if (file) {
                 if (file.type.startsWith('image/')) {
                     const reader = new FileReader();
@@ -834,7 +841,6 @@
                             let quality = 0.9;
                             let dataUrl = canvas.toDataURL('image/jpeg', quality);
                             
-                            // 680000 حرف من Base64 تعادل تقريباً 500 كيلوبايت
                             while (dataUrl.length > 680000 && quality > 0.1) {
                                 quality -= 0.1;
                                 dataUrl = canvas.toDataURL('image/jpeg', quality);
@@ -1015,7 +1021,6 @@
             state.role = role;
             state.companyId = companyId;
             
-            // تسجيل الدخول في التخزين المحلي
             localStorage.setItem('prouver_auth', JSON.stringify({ role, companyId }));
             
             document.getElementById('logoutLink').style.display = 'block';
@@ -1042,7 +1047,6 @@
             state.role = 'guest';
             state.companyId = null;
             
-            // حذف جلسة تسجيل الدخول من التخزين المحلي
             localStorage.removeItem('prouver_auth');
             
             document.getElementById('logoutLink').style.display = 'none';
@@ -1141,8 +1145,8 @@
             let dbData = JSON.parse(localStorage.getItem('prouver_db'));
             let sets = JSON.parse(localStorage.getItem('prouver_settings'))[state.companyId] || JSON.parse(localStorage.getItem('prouver_settings'))['default'];
             
-            let myPayments = state.role === 'admin' ? dbData.payments : dbData.payments.filter(p => p.companyId === state.companyId);
-            let myReports = state.role === 'admin' ? dbData.reports : dbData.reports.filter(r => r.companyId === state.companyId);
+            let myPayments = dbData.payments.filter(p => p.companyId === state.companyId);
+            let myReports = dbData.reports.filter(r => r.companyId === state.companyId);
 
             const now = Date.now();
             let needsUpdate = false;
