@@ -520,7 +520,7 @@
 
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-    import { getFirestore, collection, addDoc, getDocs, updateDoc, doc, setDoc, getDoc, query, where, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+    import { getFirestore, collection, addDoc, getDocs, updateDoc, doc, setDoc, getDoc, query, where, serverTimestamp, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
     
     const firebaseConfig = {
         apiKey: "AIzaSyBPMJ3vkjIThlGyBTKKZ44BpV0mTaT9U4Q",
@@ -719,10 +719,48 @@
         }
 
         window.addEventListener('hashchange', handleRoute);
+        
         window.addEventListener('load', () => {
             changeLanguage('ar'); 
+            
+            // استعادة جلسة تسجيل الدخول من التخزين المحلي بعد التحديث
+            const savedAuth = JSON.parse(localStorage.getItem('prouver_auth'));
+            if(savedAuth) {
+                login(savedAuth.companyId, savedAuth.role, true);
+            }
+            
             handleRoute();        
+            setupRealtimeListeners();
         });
+
+        // وظيفة التحديث اللحظي الأوتوماتيكي باستخدام onSnapshot
+        function setupRealtimeListeners() {
+            if (!isFirebaseReady) return;
+
+            onSnapshot(collection(db, "payments"), (snapshot) => {
+                let dbData = JSON.parse(localStorage.getItem('prouver_db')) || {payments:[], reports:[], accounts:[]};
+                dbData.payments = [];
+                snapshot.forEach(doc => { let d = doc.data(); d.id = doc.id; dbData.payments.push(d); });
+                localStorage.setItem('prouver_db', JSON.stringify(dbData));
+                if (state.role !== 'guest') loadDashboardData(true);
+            });
+
+            onSnapshot(collection(db, "reports"), (snapshot) => {
+                let dbData = JSON.parse(localStorage.getItem('prouver_db')) || {payments:[], reports:[], accounts:[]};
+                dbData.reports = [];
+                snapshot.forEach(doc => { let d = doc.data(); d.id = doc.id; dbData.reports.push(d); });
+                localStorage.setItem('prouver_db', JSON.stringify(dbData));
+                if (state.role !== 'guest') loadDashboardData(true);
+            });
+
+            onSnapshot(collection(db, "accounts"), (snapshot) => {
+                let dbData = JSON.parse(localStorage.getItem('prouver_db')) || {payments:[], reports:[], accounts:[]};
+                dbData.accounts = [];
+                snapshot.forEach(doc => { let d = doc.data(); d.id = doc.id; dbData.accounts.push(d); });
+                localStorage.setItem('prouver_db', JSON.stringify(dbData));
+                if (state.role !== 'guest') loadDashboardData(true);
+            });
+        }
 
         function handleRoute() {
             let hash = "";
@@ -778,13 +816,44 @@
                 btn.disabled = false;
             };
 
+            // ضغط الصور أوتوماتيكياً قبل الرفع لكي لا تتجاوز 500 KB
             if (file) {
-                const reader = new FileReader();
-                reader.onload = async (ev) => {
-                    fileBase64 = ev.target.result;
-                    await processSubmit();
-                };
-                reader.readAsDataURL(file);
+                if (file.type.startsWith('image/')) {
+                    const reader = new FileReader();
+                    reader.onload = (ev) => {
+                        const img = new Image();
+                        img.onload = async () => {
+                            const canvas = document.createElement('canvas');
+                            const ctx = canvas.getContext('2d');
+                            const maxWidth = 1024;
+                            const scale = Math.min(maxWidth / img.width, 1);
+                            canvas.width = img.width * scale;
+                            canvas.height = img.height * scale;
+                            ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+                            
+                            let quality = 0.9;
+                            let dataUrl = canvas.toDataURL('image/jpeg', quality);
+                            
+                            // 680000 حرف من Base64 تعادل تقريباً 500 كيلوبايت
+                            while (dataUrl.length > 680000 && quality > 0.1) {
+                                quality -= 0.1;
+                                dataUrl = canvas.toDataURL('image/jpeg', quality);
+                            }
+                            
+                            fileBase64 = dataUrl;
+                            await processSubmit();
+                        };
+                        img.src = ev.target.result;
+                    };
+                    reader.readAsDataURL(file);
+                } else {
+                    const reader = new FileReader();
+                    reader.onload = async (ev) => {
+                        fileBase64 = ev.target.result;
+                        await processSubmit();
+                    };
+                    reader.readAsDataURL(file);
+                }
             } else {
                 await processSubmit();
             }
@@ -942,10 +1011,16 @@
             }
         });
 
-        function login(companyId, role) {
+        function login(companyId, role, isRestore = false) {
             state.role = role;
             state.companyId = companyId;
+            
+            // تسجيل الدخول في التخزين المحلي
+            localStorage.setItem('prouver_auth', JSON.stringify({ role, companyId }));
+            
             document.getElementById('logoutLink').style.display = 'block';
+            document.getElementById('adminLink').style.display = 'block';
+            document.getElementById('adminLink').setAttribute('onclick', "navigate('dashboard'); toggleMenu();");
             
             if(role === 'admin') {
                 document.querySelectorAll('.admin-only').forEach(el => el.style.display = el.tagName === 'TD' || el.tagName === 'TH' ? 'table-cell' : 'block');
@@ -960,13 +1035,19 @@
             }
             
             loadDashboardData();
-            navigate('dashboard');
+            if (!isRestore) navigate('dashboard');
         }
 
         window.logout = () => {
             state.role = 'guest';
             state.companyId = null;
+            
+            // حذف جلسة تسجيل الدخول من التخزين المحلي
+            localStorage.removeItem('prouver_auth');
+            
             document.getElementById('logoutLink').style.display = 'none';
+            document.getElementById('adminLink').style.display = 'none';
+            document.getElementById('adminLink').setAttribute('onclick', "navigate('admin_login'); toggleMenu();");
             document.getElementById('companyUrlContainer').style.display = 'none';
             window.location.hash = '';
             navigate('home');
@@ -1054,8 +1135,9 @@
             }
         }
 
-        async function loadDashboardData() {
-            await fetchDashboardDataFromFirebase();
+        async function loadDashboardData(skipFetch = false) {
+            if (!skipFetch) await fetchDashboardDataFromFirebase();
+            
             let dbData = JSON.parse(localStorage.getItem('prouver_db'));
             let sets = JSON.parse(localStorage.getItem('prouver_settings'))[state.companyId] || JSON.parse(localStorage.getItem('prouver_settings'))['default'];
             
@@ -1186,7 +1268,7 @@
                 let p = dbData.payments.find(x => x.id === id);
                 if(p) { p.status = newStatus; localStorage.setItem('prouver_db', JSON.stringify(dbData)); }
             }
-            loadDashboardData();
+            loadDashboardData(true);
         };
 
         window.accAction = async (id, newStatus, newSub = null) => {
@@ -1208,7 +1290,7 @@
                     localStorage.setItem('prouver_db', JSON.stringify(dbData)); 
                 }
             }
-            if(state.role === 'admin' || state.role === 'commercial') loadDashboardData();
+            if(state.role === 'admin' || state.role === 'commercial') loadDashboardData(true);
         };
 
         document.getElementById('settingsForm').addEventListener('submit', async (e)=>{
