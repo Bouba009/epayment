@@ -63,15 +63,43 @@
         .view-section.active { display: block; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* --- Main Animated Logo (On Home Page) --- */
-        @keyframes pulseLogo {
-            0% { transform: scale(1); filter: drop-shadow(0 0 5px rgba(0,86,179,0.3)); }
-            50% { transform: scale(1.05); filter: drop-shadow(0 0 15px rgba(0,86,179,0.6)); }
-            100% { transform: scale(1); filter: drop-shadow(0 0 5px rgba(0,86,179,0.3)); }
-        }
+        /* --- Main Animated Logo (Popup & SVG Drawing) --- */
         .main-animated-header { text-align: center; margin-bottom: 25px; margin-top: 10px; }
-        .main-logo-anim { font-size: 45px; font-weight: 900; color: var(--primary-blue); animation: pulseLogo 2.5s infinite ease-in-out; display: flex; justify-content: center; align-items: center; gap: 12px; margin-bottom: 10px;}
-        .main-logo-anim i { color: var(--success-green); font-size: 38px; }
+        
+        /* Popup Animation for the text */
+        @keyframes popupLogoAnim {
+            0% { transform: scale(0.5); opacity: 0; }
+            60% { transform: scale(1.1); opacity: 1; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        
+        .main-logo-anim { 
+            font-size: 45px; font-weight: 900; color: var(--primary-blue); 
+            display: flex; justify-content: center; align-items: center; gap: 12px; margin-bottom: 10px;
+            animation: popupLogoAnim 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+        }
+
+        /* SVG Checkmark Drawing Animation */
+        .draw-check { width: 45px; height: 45px; }
+        .draw-check-circle {
+            stroke: var(--success-green);
+            stroke-width: 3;
+            stroke-dasharray: 166;
+            stroke-dashoffset: 166;
+            animation: drawStroke 1s cubic-bezier(0.65, 0, 0.45, 1) forwards;
+        }
+        .draw-check-path {
+            stroke: var(--success-green);
+            stroke-width: 4;
+            stroke-dasharray: 48;
+            stroke-dashoffset: 48;
+            /* يبدأ الرسم بعد انتهاء رسم الدائرة */
+            animation: drawStroke 0.5s cubic-bezier(0.65, 0, 0.45, 1) 0.8s forwards;
+        }
+        @keyframes drawStroke {
+            100% { stroke-dashoffset: 0; }
+        }
+
         .main-title-text { color: var(--primary-blue); font-weight: 800; font-size: 24px; letter-spacing: 1px; }
 
         /* --- Professional Cheque UI --- */
@@ -165,6 +193,7 @@
             .admin-tabs button { padding: 8px 15px; font-size: 14px;}
             .main-logo-anim { font-size: 35px; }
             .main-title-text { font-size: 20px; }
+            .draw-check { width: 35px; height: 35px; }
         }
     </style>
 </head>
@@ -207,10 +236,14 @@
         <!-- VIEW 1: Home (Payment Form) -->
         <section id="view-home" class="view-section active">
             
-            <!-- Animated Logo & Title (Main Page Only) -->
+            <!-- Animated Logo (Popup) & Drawing SVG Checkmark (Main Page Only) -->
             <div class="main-animated-header">
                 <div class="main-logo-anim">
-                    <i class="fas fa-check-circle"></i>Prouver
+                    <svg class="draw-check" viewBox="0 0 52 52">
+                        <circle class="draw-check-circle" cx="26" cy="26" r="25" fill="none"/>
+                        <path class="draw-check-path" fill="none" d="M14.1 27.2l7.1 7.2 16.7-16.8"/>
+                    </svg>
+                    Prouver
                 </div>
                 <h2 class="main-title-text" id="mainPageTitle" data-i18n="title_payment">تأكيد الدفع Payment</h2>
             </div>
@@ -480,16 +513,7 @@
 
     // --- SECURE ENCAPSULATION & LOGIC ---
     (function() {
-        // --- 1. Security & Hashing ---
-        async function hashData(message) {
-            const msgUint8 = new TextEncoder().encode(message);
-            const hashBuffer = await crypto.subtle.digest('SHA-256', msgUint8);
-            const hashArray = Array.from(new Uint8Array(hashBuffer));
-            return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
-        }
-        // Hash for #abobob2026#
-        const ADMIN_HASH = "b46618d363f822a106e23ddb5ea9ba88001712a2c7cfbc2e7a3f3b92ebed42b1"; 
-
+        
         // --- 2. State Management ---
         const state = {
             lang: 'ar',
@@ -578,336 +602,3 @@
         window.changeLanguage = (lang) => {
             state.lang = lang;
             document.documentElement.lang = lang;
-            document.documentElement.dir = lang === 'ar' ? 'rtl' : 'ltr';
-            document.getElementById('btn-ar').className = lang === 'ar' ? 'active' : '';
-            document.getElementById('btn-fr').className = lang === 'fr' ? 'active' : '';
-            
-            document.querySelectorAll('[data-i18n]').forEach(el => {
-                const key = el.getAttribute('data-i18n');
-                if(i18n[lang][key]) el.innerHTML = el.innerHTML.replace(el.innerText.trim(), i18n[lang][key]); 
-            });
-
-            loadPublicSettings();
-        };
-
-        window.navigate = (viewId) => {
-            document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active'));
-            document.getElementById('view-' + viewId).classList.add('active');
-
-            if(viewId === 'about' || viewId === 'privacy') {
-                const sets = JSON.parse(localStorage.getItem('prouver_settings'))[state.targetCompany] || JSON.parse(localStorage.getItem('prouver_settings'))['default'];
-                document.getElementById('textContent').innerHTML = `<h3 style="color:var(--primary-blue); border-bottom:2px solid #eee; padding-bottom:10px; margin-bottom:15px;"><i class="fas fa-file-alt"></i> ${i18n[state.lang]['nav_'+viewId]}</h3><p style="white-space: pre-wrap;">${sets[state.lang][viewId === 'about'? 'about' : 'priv']}</p>`;
-            }
-        };
-
-        function loadPublicSettings() {
-            const sets = JSON.parse(localStorage.getItem('prouver_settings'));
-            const data = sets[state.targetCompany] || sets['default'];
-            document.getElementById('pub-name').innerText = data[state.lang].name;
-            document.getElementById('pub-rip').innerText = data.rip || "---";
-            document.getElementById('pub-address').innerText = data[state.lang].address;
-        }
-
-        // Routing Logic
-        window.addEventListener('hashchange', handleRoute);
-        window.addEventListener('load', () => {
-            handleRoute();
-            changeLanguage('ar');
-        });
-
-        function handleRoute() {
-            const hash = window.location.hash;
-            if (hash === '#admin#09#') {
-                state.targetCompany = 'default';
-                navigate('admin_login');
-            } else if (hash.startsWith('#/')) {
-                state.targetCompany = decodeURIComponent(hash.replace('#/', ''));
-                navigate('home');
-                loadPublicSettings();
-            } else {
-                state.targetCompany = 'default';
-                navigate('home');
-            }
-        }
-
-        // Public Forms
-        document.getElementById('paymentForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const btn = document.getElementById('btn_submit_pay');
-            const originalText = btn.innerHTML;
-            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> جاري الإرسال...';
-            btn.disabled = true;
-
-            const data = {
-                name: document.getElementById('pay_name').value,
-                phone: document.getElementById('pay_phone').value,
-                wilaya: document.getElementById('pay_wilaya').value,
-                rip: document.getElementById('pay_rip').value,
-                course: document.getElementById('pay_course').value,
-                status: 'pending',
-                fileName: document.getElementById('pay_file').files[0]?.name || 'No file'
-            };
-
-            await saveData('payments', data);
-            
-            Swal.fire({
-                icon: 'success', title: i18n[state.lang].msg_success,
-                showConfirmButton: false, timer: 2500, backdrop: `rgba(0,86,179,0.4)`
-            });
-            
-            e.target.reset();
-            btn.innerHTML = originalText;
-            btn.disabled = false;
-        });
-
-        window.openReportModal = () => {
-            Swal.fire({
-                title: `<i class="fas fa-exclamation-triangle" style="color:var(--warning-orange)"></i> ` + i18n[state.lang].nav_report,
-                html: document.getElementById('reportTemplate').innerHTML,
-                confirmButtonText: '<i class="fas fa-paper-plane"></i> إرسال / Envoyer',
-                confirmButtonColor: '#0056b3',
-                preConfirm: () => {
-                    return {
-                        name: document.getElementById('rep_name').value,
-                        email: document.getElementById('rep_email').value,
-                        phone: document.getElementById('rep_phone').value,
-                        desc: document.getElementById('rep_desc').value
-                    }
-                }
-            }).then(async (result) => {
-                if(result.isConfirmed && result.value.name) {
-                    await saveData('reports', result.value);
-                    Swal.fire({ icon:'success', title: i18n[state.lang].msg_report, timer: 1500, showConfirmButton:false });
-                }
-            });
-        };
-
-        // Commercial Auth
-        window.toggleCommAuth = (type) => {
-            document.getElementById('commLoginForm').classList.toggle('active', type==='login');
-            document.getElementById('commRegForm').classList.toggle('active', type==='register');
-            document.querySelectorAll('#view-commercial .admin-tabs button').forEach(b => b.classList.remove('active'));
-            event.target.classList.add('active');
-        };
-
-        document.getElementById('commRegForm').addEventListener('submit', async(e)=>{
-            e.preventDefault();
-            const comp = document.getElementById('cr_company').value.trim();
-            await saveData('accounts', {
-                name: document.getElementById('cr_name').value,
-                phone: document.getElementById('cr_phone').value,
-                email: document.getElementById('cr_email').value,
-                company: comp,
-                pass: document.getElementById('cr_pass').value,
-                status: 'pending'
-            });
-            
-            let sets = JSON.parse(localStorage.getItem('prouver_settings'));
-            sets[comp] = {
-                ar: { name: comp, address: "", about: "", priv: "" },
-                fr: { name: comp, address: "", about: "", priv: "" },
-                rip: ""
-            };
-            localStorage.setItem('prouver_settings', JSON.stringify(sets));
-
-            Swal.fire({ icon:'info', title: i18n[state.lang].msg_reg_wait, confirmButtonColor: '#0056b3' });
-            e.target.reset();
-        });
-
-        document.getElementById('commLoginForm').addEventListener('submit', (e)=>{
-            e.preventDefault();
-            const em = document.getElementById('cl_email').value;
-            const pw = document.getElementById('cl_pass').value;
-            
-            let ldb = JSON.parse(localStorage.getItem('prouver_db'));
-            const acc = ldb.accounts.find(a => a.email === em && a.pass === pw);
-            if(acc) {
-                if(acc.status === 'active') {
-                    login(acc.company, 'commercial');
-                } else {
-                    Swal.fire('حساب قيد المراجعة', 'يرجى الانتظار لحين موافقة الإدارة على حسابك', 'warning');
-                }
-            } else {
-                Swal.fire('خطأ', 'بيانات الدخول غير صحيحة', 'error');
-            }
-        });
-
-        // Admin Auth (Strictly Custom Logic, No Firebase Auth Required)
-        document.getElementById('adminLoginForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const user = document.getElementById('admin_user').value.trim();
-            const pass = document.getElementById('admin_pass').value;
-            const hash = await hashData(pass);
-            
-            // This verification is entirely local and independent of Firebase Auth
-            if (user === 'admin' && hash === ADMIN_HASH) {
-                login('default', 'admin');
-                document.getElementById('adminLoginForm').reset();
-            } else {
-                Swal.fire('Access Denied', 'Invalid Username or Token', 'error');
-            }
-        });
-
-        function login(companyId, role) {
-            state.role = role;
-            state.companyId = companyId;
-            document.getElementById('logoutLink').style.display = 'block';
-            
-            if(role === 'admin') {
-                document.querySelectorAll('.admin-only').forEach(el => el.style.display = el.tagName === 'TD' || el.tagName === 'TH' ? 'table-cell' : 'block');
-            } else {
-                document.querySelectorAll('.admin-only').forEach(el => el.style.display = 'none');
-                document.getElementById('companyUrlContainer').style.display = 'block';
-                const link = window.location.origin + window.location.pathname + '#/' + encodeURIComponent(companyId);
-                document.getElementById('companyLink').href = link;
-                document.getElementById('companyLink').innerText = link;
-            }
-            
-            loadDashboardData();
-            navigate('dashboard');
-        }
-
-        window.logout = () => {
-            state.role = 'guest';
-            state.companyId = null;
-            document.getElementById('logoutLink').style.display = 'none';
-            document.getElementById('companyUrlContainer').style.display = 'none';
-            window.location.hash = '';
-            navigate('home');
-        };
-
-        window.switchDashTab = (tab) => {
-            document.querySelectorAll('#view-dashboard .admin-tab-content').forEach(el => el.classList.remove('active'));
-            document.getElementById('tab-' + tab).classList.add('active');
-            document.querySelectorAll('#view-dashboard .tab-btn').forEach(b => b.classList.remove('active'));
-            event.target.classList.add('active');
-        };
-
-        function loadDashboardData() {
-            let dbData = JSON.parse(localStorage.getItem('prouver_db'));
-            let sets = JSON.parse(localStorage.getItem('prouver_settings'))[state.companyId] || JSON.parse(localStorage.getItem('prouver_settings'))['default'];
-            
-            let myPayments = state.role === 'admin' ? dbData.payments : dbData.payments.filter(p => p.companyId === state.companyId);
-            let myReports = state.role === 'admin' ? dbData.reports : dbData.reports.filter(r => r.companyId === state.companyId);
-
-            const now = Date.now();
-            myPayments.forEach(p => {
-                if(p.status === 'pending') {
-                    const hrs = (now - p.timestamp) / (1000 * 60 * 60);
-                    if(hrs >= 48) p.status = 'failed';
-                }
-            });
-            localStorage.setItem('prouver_db', JSON.stringify(dbData));
-
-            document.getElementById('st_all').innerText = myPayments.length;
-            document.getElementById('st_new').innerText = myPayments.filter(p=>p.status==='pending').length;
-            document.getElementById('st_fail').innerText = myPayments.filter(p=>p.status==='failed').length;
-            document.getElementById('st_rep').innerText = myReports.length;
-            if(state.role === 'admin') document.getElementById('st_comm').innerText = dbData.accounts.length;
-
-            const tbodyP = document.getElementById('tbl_payments');
-            tbodyP.innerHTML = '';
-            myPayments.filter(p=>p.status !== 'failed').forEach(p => {
-                const hrs = (now - p.timestamp) / (1000 * 60 * 60);
-                let timeColor = 'bg-green', timeTxt = Math.floor(hrs) + 'h';
-                if(p.status === 'paid') { timeColor = 'bg-gray'; timeTxt = '-'; }
-                else if(hrs >= 24) timeColor = 'bg-orange';
-
-                let actionHtml = p.status === 'paid' ? '<span class="status-badge bg-blue"><i class="fas fa-check"></i> مدفوع</span>' : 
-                    `<button class="btn-action bg-blue" onclick="changePayStatus('${p.id}', 'paid')">قبول</button>
-                     <button class="btn-action bg-red" onclick="changePayStatus('${p.id}', 'failed')">رفض</button>`;
-
-                tbodyP.innerHTML += `<tr>
-                    <td dir="ltr">${new Date(p.timestamp).toLocaleString()}</td>
-                    <td>${p.name}</td><td>${p.wilaya}</td><td>${p.course || '-'}</td><td dir="ltr">${p.phone}</td>
-                    <td>${p.fileName}</td>
-                    <td><span class="status-badge ${timeColor}">${timeTxt}</span></td>
-                    <td>${actionHtml}</td>
-                </tr>`;
-            });
-
-            const tbodyF = document.getElementById('tbl_failed');
-            tbodyF.innerHTML = '';
-            myPayments.filter(p=>p.status === 'failed').forEach(p => {
-                tbodyF.innerHTML += `<tr>
-                    <td dir="ltr">${new Date(p.timestamp).toLocaleString()}</td>
-                    <td>${p.name}</td><td>${p.course || '-'}</td><td>${p.fileName}</td>
-                    <td><span class="status-badge bg-red"><i class="fas fa-times"></i> فاشل</span></td>
-                </tr>`;
-            });
-
-            document.getElementById('tbl_reports').innerHTML = myReports.map(r => `<tr>
-                <td dir="ltr">${new Date(r.timestamp).toLocaleString()}</td><td>${r.name}</td><td dir="ltr">${r.phone}</td><td>${r.email}</td><td>${r.desc}</td>
-            </tr>`).join('');
-
-            if(state.role === 'admin') {
-                const tbodyReq = document.getElementById('tbl_acc_req');
-                const tbodyAct = document.getElementById('tbl_acc_active');
-                tbodyReq.innerHTML = ''; tbodyAct.innerHTML = '';
-                
-                dbData.accounts.forEach(a => {
-                    if(a.status === 'pending') {
-                        tbodyReq.innerHTML += `<tr><td>${a.company}</td><td>${a.name}</td><td dir="ltr">${a.phone}</td>
-                            <td><button class="btn-action bg-green" onclick="accAction('${a.id}','active')"><i class="fas fa-check"></i> موافقة</button></td></tr>`;
-                    } else {
-                        const lnk = window.location.origin + window.location.pathname + '#/' + encodeURIComponent(a.company);
-                        tbodyAct.innerHTML += `<tr><td dir="ltr">${new Date(a.timestamp).toLocaleString()}</td><td>${a.company}</td>
-                            <td dir="ltr"><a href="${lnk}" target="_blank" style="color:var(--primary-blue); text-decoration:none;"><i class="fas fa-external-link-alt"></i> ${lnk}</a></td></tr>`;
-                    }
-                });
-            }
-
-            document.getElementById('set_name_ar').value = sets.ar.name || "";
-            document.getElementById('set_name_fr').value = sets.fr.name || "";
-            document.getElementById('set_rip').value = sets.rip || "";
-            document.getElementById('set_address_ar').value = sets.ar.address || "";
-            document.getElementById('set_address_fr').value = sets.fr.address || "";
-            
-            if(state.role === 'admin') {
-                document.getElementById('set_about_ar').value = sets.ar.about || "";
-                document.getElementById('set_about_fr').value = sets.fr.about || "";
-                document.getElementById('set_priv_ar').value = sets.ar.priv || "";
-                document.getElementById('set_priv_fr').value = sets.fr.priv || "";
-            }
-        }
-
-        window.changePayStatus = (id, newStatus) => {
-            let dbData = JSON.parse(localStorage.getItem('prouver_db'));
-            let p = dbData.payments.find(x => x.id === id);
-            if(p) { p.status = newStatus; localStorage.setItem('prouver_db', JSON.stringify(dbData)); loadDashboardData(); }
-        };
-
-        window.accAction = (id, newStatus) => {
-            let dbData = JSON.parse(localStorage.getItem('prouver_db'));
-            let a = dbData.accounts.find(x => x.id === id);
-            if(a) { a.status = newStatus; localStorage.setItem('prouver_db', JSON.stringify(dbData)); loadDashboardData(); }
-        };
-
-        document.getElementById('settingsForm').addEventListener('submit', (e)=>{
-            e.preventDefault();
-            let allSets = JSON.parse(localStorage.getItem('prouver_settings'));
-            
-            let cur = allSets[state.companyId] || { ar:{}, fr:{} };
-            cur.ar.name = document.getElementById('set_name_ar').value;
-            cur.fr.name = document.getElementById('set_name_fr').value;
-            cur.rip = document.getElementById('set_rip').value;
-            cur.ar.address = document.getElementById('set_address_ar').value;
-            cur.fr.address = document.getElementById('set_address_fr').value;
-
-            if(state.role === 'admin') {
-                cur.ar.about = document.getElementById('set_about_ar').value;
-                cur.fr.about = document.getElementById('set_about_fr').value;
-                cur.ar.priv = document.getElementById('set_priv_ar').value;
-                cur.fr.priv = document.getElementById('set_priv_fr').value;
-            }
-
-            allSets[state.companyId] = cur;
-            localStorage.setItem('prouver_settings', JSON.stringify(allSets));
-            Swal.fire({icon:'success', title:'تم الحفظ', text:'تم تحديث المعلومات بنجاح', confirmButtonColor:'#0056b3'});
-            loadPublicSettings(); 
-        });
-
-    })();
-</script>
-</body>
-</html>
